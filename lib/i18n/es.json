@@ -1,0 +1,356 @@
+{
+  "landing": {
+    "headline": "Crea un Currículum Profesional — Gratis",
+    "subheadline": "Guía paso a paso, con inteligencia artificial, sin experiencia previa",
+    "cta": "Crear Mi Currículum",
+    "features": [
+      "Gratis para siempre — sin registro",
+      "Soporte bilingüe: Inglés y Español",
+      "Resultados profesionales en minutos"
+    ],
+    "footer": "Al usar este servicio, su información puede ser almacenada y utilizada para mejorar nuestro programa.",
+    "privacy": "Privacidad"
+  },
+  "nav": {
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir esta sección →",
+    "finish": "Terminar y Vista Previa",
+    "buildResume": "Crear Mi Currículum",
+    "downloadPDF": "Descargar PDF",
+    "sendEmail": "Enviar a Mi Correo",
+    "finalize": "Finalizar Mi Currículum"
+  },
+  "progress": {
+    "step": "Paso",
+    "of": "de",
+    "stepsLabel": "pasos"
+  },
+  "steps": {
+    "0": {
+      "title": "Vamos a Crear Tu Currículum",
+      "description": "Te guiaremos en 15 pasos rápidos. Responde lo mejor que puedas — no hay respuestas incorrectas. La IA convertirá tus respuestas en un currículum profesional."
+    },
+    "1": {
+      "title": "Información de Contacto",
+      "description": "Así es como los empleadores se comunicarán contigo. Solo tu nombre y datos de contacto aparecerán en el currículum."
+    },
+    "2": {
+      "title": "Experiencia Laboral",
+      "description": "Cuéntanos sobre tus trabajos — incluyendo trabajos de medio tiempo, temporales y por cuenta propia. Esta es la sección más importante."
+    },
+    "3": {
+      "title": "Educación",
+      "description": "Incluye cualquier estudio que hayas completado o en el que estés trabajando."
+    },
+    "4": {
+      "title": "Trabajo Voluntario",
+      "description": "¡El trabajo no remunerado cuenta! Servicio comunitario, trabajo en iglesia, ayudar a vecinos — todo demuestra carácter."
+    },
+    "5": {
+      "title": "Certificaciones y Licencias",
+      "description": "Marca todo lo que tengas — incluso si está vencido, muestra capacitación."
+    },
+    "6": {
+      "title": "Habilidades",
+      "description": "Marca todo lo que aplique. Sé honesto — solo marca lo que realmente sabes hacer."
+    },
+    "7": {
+      "title": "Servicio Militar",
+      "description": "La experiencia militar es muy valorada por los empleadores. Describe tu servicio."
+    },
+    "8": {
+      "title": "Capacitaciones y Cursos",
+      "description": "Cualquier capacitación laboral, cursos en línea o talleres que hayas completado."
+    },
+    "9": {
+      "title": "Premios y Reconocimientos",
+      "description": "Empleado del mes, certificados de finalización, cualquier reconocimiento recibido."
+    },
+    "10": {
+      "title": "Períodos Sin Empleo",
+      "description": "Si estuviste sin trabajar, podemos presentar eso positivamente. No estás obligado a divulgarlo."
+    },
+    "11": {
+      "title": "Logros",
+      "description": "Piensa en cosas que hiciste bien. Estos se convierten en puntos poderosos en el currículum."
+    },
+    "12": {
+      "title": "Intereses y Pasatiempos",
+      "description": "Opcional — a veces un interés compartido crea una conexión con quien contrata."
+    },
+    "13": {
+      "title": "Referencias",
+      "description": "¿Quién puede hablar de tu trabajo? Ex supervisores, compañeros o miembros de la comunidad."
+    },
+    "14": {
+      "title": "Objetivos Profesionales",
+      "description": "Ayuda a la IA a escribir un resumen que coincida con lo que buscas."
+    },
+    "15": {
+      "title": "Disponibilidad",
+      "description": "Esta información es privada — solo ayuda a mejorar el servicio."
+    }
+  },
+  "contact": {
+    "fullName": "Nombre Completo",
+    "fullNamePlaceholder": "ej. Maria García",
+    "legalName": "Nombre Legal (opcional)",
+    "legalNameHelper": "No aparece en el currículum — solo para tus registros",
+    "phone": "Número de Teléfono",
+    "phonePlaceholder": "ej. (555) 123-4567",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "ej. maria@correo.com",
+    "addressOption": "Dirección en el Currículum",
+    "addressFull": "Incluir dirección completa",
+    "addressCityState": "Solo ciudad y estado",
+    "addressNone": "No incluir",
+    "fullAddress": "Dirección",
+    "fullAddressPlaceholder": "123 Calle Principal, Ciudad, Estado",
+    "cityState": "Ciudad, Estado",
+    "cityStatePlaceholder": "ej. Dallas, TX"
+  },
+  "work": {
+    "addJob": "+ Agregar Otro Trabajo",
+    "jobTitle": "Puesto / Título",
+    "jobTitlePlaceholder": "ej. Cajero, Trabajador de Almacén",
+    "employer": "Empleador / Nombre de la Empresa",
+    "employerPlaceholder": "ej. McDonald's, Amazon",
+    "cityState": "Ciudad, Estado",
+    "cityStatePlaceholder": "ej. Houston, TX",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "current": "Trabajo aquí actualmente",
+    "description": "Describe tu trabajo",
+    "descriptionPlaceholder": "Cuéntanos sobre este trabajo. Algunas preguntas para ayudarte:\n• ¿Cuántas horas por semana?\n• ¿Manejabas dinero en efectivo o una caja?\n• ¿Qué tan grande era tu equipo?\n• ¿Entrenaste o supervisaste a alguien?\n• ¿Qué equipos o software usabas?\n• ¿De qué estás más orgulloso de este trabajo?",
+    "removeJob": "Eliminar este trabajo"
+  },
+  "education": {
+    "addEntry": "+ Agregar Otro Estudio",
+    "type": "Tipo de Educación",
+    "types": {
+      "highSchool": "Preparatoria / GED",
+      "someCollege": "Algo de Universidad",
+      "associates": "Licenciatura Asociada",
+      "bachelors": "Licenciatura",
+      "trade": "Vocacional / Técnico",
+      "other": "Otro"
+    },
+    "school": "Nombre de la Escuela",
+    "schoolPlaceholder": "ej. Houston Community College",
+    "cityState": "Ciudad, Estado",
+    "completionDate": "Fecha de Graduación",
+    "inProgress": "En Progreso",
+    "field": "Campo de Estudio / Carrera",
+    "fieldPlaceholder": "ej. Administración de Empresas",
+    "notes": "Honores, Clubes o Notas",
+    "notesPlaceholder": "ej. Lista del Decano, Consejo Estudiantil",
+    "removeEntry": "Eliminar"
+  },
+  "volunteer": {
+    "addEntry": "+ Agregar Trabajo Voluntario",
+    "role": "Tu Rol / Título",
+    "rolePlaceholder": "ej. Voluntario en Banco de Alimentos",
+    "org": "Organización",
+    "orgPlaceholder": "ej. Banco de Alimentos de Houston",
+    "dates": "Fechas",
+    "datesPlaceholder": "ej. 2020 – 2022",
+    "description": "¿Qué hiciste?",
+    "descriptionPlaceholder": "ej. Clasifiqué y empaqué donaciones de alimentos, asistí a más de 100 familias semanalmente",
+    "removeEntry": "Eliminar"
+  },
+  "certifications": {
+    "title": "Selecciona todo lo que aplique",
+    "issuer": "Expedido por / Dónde lo obtuviste",
+    "issuerPlaceholder": "ej. Cruz Roja, Instituto de Capacitación OSHA",
+    "expiration": "Fecha de Vencimiento",
+    "expirationPlaceholder": "MM/AAAA o N/A",
+    "status": "Estado",
+    "active": "Activo",
+    "expired": "Vencido",
+    "inProgress": "En Proceso"
+  },
+  "skills": {
+    "computer": "Computación y Tecnología",
+    "communication": "Comunicación",
+    "physical": "Físico y Oficios",
+    "interpersonal": "Interpersonal",
+    "other": "Otras Habilidades",
+    "otherPlaceholder": "Lista otras habilidades...",
+    "bilingualLanguage": "¿Qué idioma(s)?",
+    "bilingualPlaceholder": "ej. Español, Francés"
+  },
+  "military": {
+    "branch": "Rama del Servicio",
+    "branchPlaceholder": "Seleccionar rama",
+    "branches": ["Ejército", "Marina", "Infantería de Marina", "Fuerza Aérea", "Guardia Costera", "Guardia Nacional"],
+    "startDate": "Fecha de Ingreso",
+    "endDate": "Fecha de Baja",
+    "rank": "Rango al Retiro",
+    "rankPlaceholder": "ej. Sargento (E-5)",
+    "mos": "MOS / Especialidad Laboral",
+    "mosPlaceholder": "ej. 11B Infantería, 92A Suministros",
+    "dischargeStatus": "Estado de Baja",
+    "dischargePlaceholder": "ej. Honorable",
+    "notes": "Notas / Logros",
+    "notesPlaceholder": "Despliegues, premios, entrenamiento especial..."
+  },
+  "training": {
+    "addEntry": "+ Agregar Capacitación",
+    "program": "Nombre del Programa / Curso",
+    "programPlaceholder": "ej. Excelencia en Servicio al Cliente",
+    "provider": "Proveedor / Organización",
+    "providerPlaceholder": "ej. Coursera, Junta Local de Fuerza Laboral",
+    "date": "Fecha de Finalización",
+    "notes": "Descripción (opcional)",
+    "notesPlaceholder": "Breve descripción de lo que aprendiste",
+    "removeEntry": "Eliminar"
+  },
+  "awards": {
+    "addEntry": "+ Agregar Premio",
+    "name": "Nombre del Premio / Reconocimiento",
+    "namePlaceholder": "ej. Empleado del Mes",
+    "giver": "Otorgado Por",
+    "giverPlaceholder": "ej. Walmart, Ciudad de Houston",
+    "date": "Fecha",
+    "removeEntry": "Eliminar"
+  },
+  "gaps": {
+    "title": "Selecciona todo lo que aplique a tu situación",
+    "reasons": {
+      "caregiving": "Cuidado de un familiar",
+      "health": "Razones de salud / médicas",
+      "school": "Regresar a la escuela",
+      "searching": "Búsqueda de empleo",
+      "relocation": "Reubicación",
+      "personal": "Razones personales"
+    },
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "notes": "Nota breve (opcional)",
+    "notesHelper": "Esto NO aparecerá en tu currículum — ayuda a enmarcar el período positivamente si es necesario"
+  },
+  "accomplishments": {
+    "yes": "Sí",
+    "no": "No",
+    "detail": "Cuéntanos más (opcional)",
+    "detailPlaceholder": "Da un breve ejemplo...",
+    "questions": {
+      "trained": "¿Alguna vez entrenaste o enseñaste a alguien?",
+      "extraResponsibilities": "¿Tomaste responsabilidades adicionales fuera de tu descripción de trabajo?",
+      "solvedProblem": "¿Resolviste un problema que mejoró o facilitó las cosas?",
+      "filledIn": "¿Alguna vez cubriste a un supervisor o gerente?",
+      "positiveFeedback": "¿Recibiste comentarios positivos o cumplidos de clientes o compañeros?",
+      "improvedProcess": "¿Mejoraste un proceso o encontraste una mejor manera de hacer algo?",
+      "hitTarget": "¿Alcanzaste una meta de ventas, cuota u otro objetivo?",
+      "attendance": "¿Tuviste asistencia perfecta o casi perfecta?"
+    }
+  },
+  "interests": {
+    "label": "Intereses y Pasatiempos (opcional)",
+    "placeholder": "ej. Coordinador de jardín comunitario, entrenador de fútbol juvenil, reparaciones caseras...",
+    "helper": "Opcional — pasatiempos o intereses que puedan ser relevantes para los empleadores (participación comunitaria, liderazgo deportivo, proyectos creativos)"
+  },
+  "references": {
+    "option": "¿Qué deseas hacer con las referencias?",
+    "onRequest": "Disponibles a pedido (recomendado)",
+    "include": "Incluir referencias",
+    "name": "Nombre Completo",
+    "namePlaceholder": "Nombre completo de la referencia",
+    "titleRelationship": "Título / Relación",
+    "titlePlaceholder": "ej. Ex Supervisor, Gerente",
+    "phone": "Teléfono",
+    "phonePlaceholder": "(555) 123-4567",
+    "email": "Correo (opcional)",
+    "emailPlaceholder": "referencia@correo.com",
+    "addReference": "+ Agregar Referencia",
+    "removeReference": "Eliminar"
+  },
+  "summary": {
+    "targetRole": "¿Qué tipo de trabajo estás buscando?",
+    "targetRolePlaceholder": "ej. un puesto de tiempo completo en servicio al cliente, trabajo en almacén, cualquier posición inicial donde pueda crecer...",
+    "strengths": "¿En qué eres mejor? ¿Con qué pueden contar de ti?",
+    "strengthsPlaceholder": "ej. Soy confiable y siempre puntual. Me llevo bien con la gente. Aprendo cosas nuevas rápidamente. Trabajo bien bajo presión..."
+  },
+  "availability": {
+    "schedule": "¿Qué horas estás disponible?",
+    "scheduleOptions": {
+      "open": "Disponible cualquier horario",
+      "weekdays": "Solo días de semana",
+      "weekends": "Solo fines de semana",
+      "flexible": "Flexible / Medio tiempo"
+    },
+    "transportation": "¿Cómo llegas al trabajo?",
+    "transportationOptions": {
+      "car": "Auto propio",
+      "transit": "Transporte público",
+      "bicycle": "Bicicleta",
+      "needAssistance": "Necesito ayuda"
+    },
+    "relocate": "¿Estás dispuesto a reubicarte?",
+    "relocateOptions": {
+      "yes": "Sí",
+      "no": "No",
+      "local": "Solo en el área local"
+    },
+    "private": "Esta información es privada y no aparece en tu currículum."
+  },
+  "processing": {
+    "title": "Creando Tu Currículum...",
+    "subtitle": "La IA está leyendo tus respuestas y creando un currículum profesional. Esto toma unos 15-20 segundos.",
+    "step1": "Analizando tu experiencia...",
+    "step2": "Creando lenguaje profesional...",
+    "step3": "Dando formato al currículum...",
+    "step4": "Agregando los últimos detalles..."
+  },
+  "preview": {
+    "title": "¡Tu Currículum está Listo!",
+    "subtitle": "Revisa tu currículum a continuación. Haz clic en cualquier texto para editarlo.",
+    "sectionOrder": "Orden de Secciones",
+    "locked": "Bloqueado",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "annotations": "Consejos para tu Currículum",
+    "dismiss": "Cerrar",
+    "finalize": "Finalizar Mi Currículum →"
+  },
+  "export": {
+    "title": "Descarga Tu Currículum",
+    "subtitle": "Tu currículum profesional está listo.",
+    "downloadPDF": "Descargar PDF",
+    "emailTitle": "O Enviar por Correo",
+    "emailLabel": "Correo Electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "sendEmail": "Enviar a Mi Correo",
+    "emailSuccess": "¡Revisa tu bandeja de entrada!",
+    "emailError": "Algo salió mal. Por favor intenta de nuevo.",
+    "startOver": "Empezar de Nuevo"
+  },
+  "errors": {
+    "required": "Este campo es requerido",
+    "invalidEmail": "Por favor ingresa un correo electrónico válido",
+    "invalidPhone": "Por favor ingresa un número de teléfono válido",
+    "generateFailed": "No se pudo generar el currículum. Por favor intenta de nuevo.",
+    "saveFailed": "No se pudo guardar. Continuando de todas formas.",
+    "rateLimited": "Demasiadas solicitudes. Por favor espera un momento."
+  },
+  "admin": {
+    "title": "Panel de Administración",
+    "password": "Contraseña de Administrador",
+    "login": "Iniciar Sesión",
+    "wrongPassword": "Contraseña incorrecta",
+    "totalResumes": "Total de Currículums",
+    "thisMonth": "Este Mes",
+    "completionRate": "Tasa de Finalización",
+    "avgTime": "Tiempo Promedio",
+    "language": "Distribución por Idioma",
+    "skills": "Habilidades Más Comunes",
+    "recent": "Currículums Recientes",
+    "name": "Nombre",
+    "date": "Fecha",
+    "lang": "Idioma",
+    "export": "Exportar",
+    "exportCSV": "Exportar CSV",
+    "loading": "Cargando..."
+  }
+}

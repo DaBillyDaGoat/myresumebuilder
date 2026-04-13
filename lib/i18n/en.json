@@ -1,0 +1,356 @@
+{
+  "landing": {
+    "headline": "Build a Professional Resume — Free",
+    "subheadline": "Step-by-step guidance, AI-powered, no experience needed",
+    "cta": "Build My Resume",
+    "features": [
+      "Free forever — no account required",
+      "Bilingual support: English & Spanish",
+      "Professional results in minutes"
+    ],
+    "footer": "By using this service, your information may be stored and used to improve our program.",
+    "privacy": "Privacy"
+  },
+  "nav": {
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip this section →",
+    "finish": "Finish & Preview",
+    "buildResume": "Create My Resume",
+    "downloadPDF": "Download PDF",
+    "sendEmail": "Send to My Email",
+    "finalize": "Finalize My Resume"
+  },
+  "progress": {
+    "step": "Step",
+    "of": "of",
+    "stepsLabel": "steps"
+  },
+  "steps": {
+    "0": {
+      "title": "Let's Build Your Resume",
+      "description": "We'll walk you through 15 quick steps. Answer as best you can — nothing is wrong. The AI will turn your answers into a professional resume."
+    },
+    "1": {
+      "title": "Contact Information",
+      "description": "This is how employers will reach you. Only your name and contact details will appear on the resume."
+    },
+    "2": {
+      "title": "Work Experience",
+      "description": "Tell us about your jobs — including part-time, seasonal, and gig work. This is the most important section."
+    },
+    "3": {
+      "title": "Education",
+      "description": "Include any schooling you have completed or are working toward."
+    },
+    "4": {
+      "title": "Volunteer Work",
+      "description": "Unpaid work counts! Community service, church work, helping neighbors — it all shows character."
+    },
+    "5": {
+      "title": "Certifications & Licenses",
+      "description": "Check everything you have — even if it's expired, it shows training."
+    },
+    "6": {
+      "title": "Skills",
+      "description": "Check all that apply. Be honest — only check what you can do."
+    },
+    "7": {
+      "title": "Military Service",
+      "description": "Military experience is highly valued by employers. Describe your service."
+    },
+    "8": {
+      "title": "Training & Courses",
+      "description": "Any job training, online courses, or workshops you've completed."
+    },
+    "9": {
+      "title": "Awards & Recognition",
+      "description": "Employee of the month, certificates of completion, anything recognized."
+    },
+    "10": {
+      "title": "Employment Gaps",
+      "description": "If you were out of work, we can frame that positively. You are not required to disclose."
+    },
+    "11": {
+      "title": "Accomplishments",
+      "description": "Think about things you did well. These become powerful resume bullets."
+    },
+    "12": {
+      "title": "Interests & Hobbies",
+      "description": "Optional — sometimes a shared interest sparks a connection with a hiring manager."
+    },
+    "13": {
+      "title": "References",
+      "description": "Who can speak to your work? Former supervisors, coworkers, or community members."
+    },
+    "14": {
+      "title": "Career Goals",
+      "description": "Help the AI write a summary that matches what you're looking for."
+    },
+    "15": {
+      "title": "Availability",
+      "description": "This stays private — just helps us improve the service."
+    }
+  },
+  "contact": {
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g. Maria Garcia",
+    "legalName": "Legal Name (optional)",
+    "legalNameHelper": "Not shown on resume — for your records only",
+    "phone": "Phone Number",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "email": "Email Address",
+    "emailPlaceholder": "e.g. maria@email.com",
+    "addressOption": "Address on Resume",
+    "addressFull": "Include full address",
+    "addressCityState": "City and state only",
+    "addressNone": "Do not include",
+    "fullAddress": "Street Address",
+    "fullAddressPlaceholder": "123 Main St, City, State ZIP",
+    "cityState": "City, State",
+    "cityStatePlaceholder": "e.g. Dallas, TX"
+  },
+  "work": {
+    "addJob": "+ Add Another Job",
+    "jobTitle": "Job Title",
+    "jobTitlePlaceholder": "e.g. Cashier, Warehouse Associate",
+    "employer": "Employer / Company Name",
+    "employerPlaceholder": "e.g. McDonald's, Amazon",
+    "cityState": "City, State",
+    "cityStatePlaceholder": "e.g. Houston, TX",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "current": "I currently work here",
+    "description": "Describe your work",
+    "descriptionPlaceholder": "Tell us about this job. Some prompts to help:\n• How many hours per week?\n• Did you handle cash or a register?\n• How big was your team?\n• Did you train or supervise anyone?\n• What equipment or software did you use?\n• What are you most proud of from this job?",
+    "removeJob": "Remove this job"
+  },
+  "education": {
+    "addEntry": "+ Add Another School",
+    "type": "Education Type",
+    "types": {
+      "highSchool": "High School / GED",
+      "someCollege": "Some College",
+      "associates": "Associate's Degree",
+      "bachelors": "Bachelor's Degree",
+      "trade": "Trade / Vocational",
+      "other": "Other"
+    },
+    "school": "School Name",
+    "schoolPlaceholder": "e.g. Houston Community College",
+    "cityState": "City, State",
+    "completionDate": "Completion Date",
+    "inProgress": "In Progress",
+    "field": "Field of Study / Major",
+    "fieldPlaceholder": "e.g. Business Administration",
+    "notes": "Honors, Clubs, or Notes",
+    "notesPlaceholder": "e.g. Dean's List, Student Council",
+    "removeEntry": "Remove"
+  },
+  "volunteer": {
+    "addEntry": "+ Add Volunteer Work",
+    "role": "Your Role / Title",
+    "rolePlaceholder": "e.g. Food Bank Volunteer",
+    "org": "Organization",
+    "orgPlaceholder": "e.g. Houston Food Bank",
+    "dates": "Dates",
+    "datesPlaceholder": "e.g. 2020 – 2022",
+    "description": "What did you do?",
+    "descriptionPlaceholder": "e.g. Sorted and packed food donations, assisted 100+ families weekly",
+    "removeEntry": "Remove"
+  },
+  "certifications": {
+    "title": "Select all that apply",
+    "issuer": "Issuer / Where you got it",
+    "issuerPlaceholder": "e.g. Red Cross, OSHA Training Institute",
+    "expiration": "Expiration Date",
+    "expirationPlaceholder": "MM/YYYY or N/A",
+    "status": "Status",
+    "active": "Active",
+    "expired": "Expired",
+    "inProgress": "In Progress"
+  },
+  "skills": {
+    "computer": "Computer & Technology",
+    "communication": "Communication",
+    "physical": "Physical & Trade",
+    "interpersonal": "Interpersonal",
+    "other": "Other Skills",
+    "otherPlaceholder": "List any other skills...",
+    "bilingualLanguage": "Which language(s)?",
+    "bilingualPlaceholder": "e.g. Spanish, French"
+  },
+  "military": {
+    "branch": "Branch of Service",
+    "branchPlaceholder": "Select branch",
+    "branches": ["Army", "Navy", "Marines", "Air Force", "Coast Guard", "National Guard"],
+    "startDate": "Entry Date",
+    "endDate": "Discharge Date",
+    "rank": "Rank at Discharge",
+    "rankPlaceholder": "e.g. Sergeant (E-5)",
+    "mos": "MOS / Job Specialty",
+    "mosPlaceholder": "e.g. 11B Infantry, 92A Supply",
+    "dischargeStatus": "Discharge Status",
+    "dischargePlaceholder": "e.g. Honorable",
+    "notes": "Notes / Accomplishments",
+    "notesPlaceholder": "Deployments, awards, special training..."
+  },
+  "training": {
+    "addEntry": "+ Add Training",
+    "program": "Program / Course Name",
+    "programPlaceholder": "e.g. Customer Service Excellence",
+    "provider": "Provider / Organization",
+    "providerPlaceholder": "e.g. Coursera, Local Workforce Board",
+    "date": "Date Completed",
+    "notes": "Description (optional)",
+    "notesPlaceholder": "Brief description of what you learned",
+    "removeEntry": "Remove"
+  },
+  "awards": {
+    "addEntry": "+ Add Award",
+    "name": "Award / Recognition Name",
+    "namePlaceholder": "e.g. Employee of the Month",
+    "giver": "Given By",
+    "giverPlaceholder": "e.g. Walmart, City of Houston",
+    "date": "Date",
+    "removeEntry": "Remove"
+  },
+  "gaps": {
+    "title": "Select any that apply to your situation",
+    "reasons": {
+      "caregiving": "Caregiving for family member",
+      "health": "Health / medical reasons",
+      "school": "Returning to school",
+      "searching": "Job searching",
+      "relocation": "Relocation",
+      "personal": "Personal reasons"
+    },
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "notes": "Brief note (optional)",
+    "notesHelper": "This will NOT appear on your resume — it helps us frame the gap positively if needed"
+  },
+  "accomplishments": {
+    "yes": "Yes",
+    "no": "No",
+    "detail": "Tell us more (optional)",
+    "detailPlaceholder": "Give a brief example...",
+    "questions": {
+      "trained": "Did you ever train or teach someone else?",
+      "extraResponsibilities": "Did you take on extra responsibilities beyond your job description?",
+      "solvedProblem": "Did you solve a problem that made things better or easier?",
+      "filledIn": "Did you ever fill in for a supervisor or manager?",
+      "positiveFeedback": "Did you receive positive feedback or compliments from customers or coworkers?",
+      "improvedProcess": "Did you improve a process or find a better way to do something?",
+      "hitTarget": "Did you hit a sales target, quota, or other goal?",
+      "attendance": "Did you have perfect or near-perfect attendance?"
+    }
+  },
+  "interests": {
+    "label": "Interests & Hobbies (optional)",
+    "placeholder": "e.g. Community garden coordinator, youth soccer coach, DIY home repair...",
+    "helper": "Optional — hobbies or interests that might be relevant to employers (community involvement, sports leadership, creative projects)"
+  },
+  "references": {
+    "option": "What would you like to do with references?",
+    "onRequest": "Available upon request (recommended)",
+    "include": "Include references",
+    "name": "Full Name",
+    "namePlaceholder": "Reference's full name",
+    "titleRelationship": "Title / Relationship",
+    "titlePlaceholder": "e.g. Former Supervisor, Manager",
+    "phone": "Phone",
+    "phonePlaceholder": "(555) 123-4567",
+    "email": "Email (optional)",
+    "emailPlaceholder": "reference@email.com",
+    "addReference": "+ Add Reference",
+    "removeReference": "Remove"
+  },
+  "summary": {
+    "targetRole": "What kind of work are you looking for?",
+    "targetRolePlaceholder": "e.g. full-time position in customer service, warehouse work, any entry-level position where I can grow...",
+    "strengths": "What are you best at? What do people count on you for?",
+    "strengthsPlaceholder": "e.g. I'm dependable and always on time. I'm good with people. I learn new things quickly. I work well under pressure..."
+  },
+  "availability": {
+    "schedule": "What hours are you available?",
+    "scheduleOptions": {
+      "open": "Open to any hours",
+      "weekdays": "Weekdays only",
+      "weekends": "Weekends only",
+      "flexible": "Flexible / Part-time"
+    },
+    "transportation": "How do you get to work?",
+    "transportationOptions": {
+      "car": "Own car",
+      "transit": "Public transit",
+      "bicycle": "Bicycle",
+      "needAssistance": "Need assistance"
+    },
+    "relocate": "Willing to relocate?",
+    "relocateOptions": {
+      "yes": "Yes",
+      "no": "No",
+      "local": "Within local area only"
+    },
+    "private": "This information stays private and does not appear on your resume."
+  },
+  "processing": {
+    "title": "Creating Your Resume...",
+    "subtitle": "The AI is reading your answers and building a professional resume. This takes about 15-20 seconds.",
+    "step1": "Analyzing your experience...",
+    "step2": "Crafting professional language...",
+    "step3": "Formatting your resume...",
+    "step4": "Adding finishing touches..."
+  },
+  "preview": {
+    "title": "Your Resume is Ready!",
+    "subtitle": "Review your resume below. Click any text to edit it.",
+    "sectionOrder": "Section Order",
+    "locked": "Locked",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "annotations": "Resume Tips",
+    "dismiss": "Dismiss",
+    "finalize": "Finalize My Resume →"
+  },
+  "export": {
+    "title": "Download Your Resume",
+    "subtitle": "Your professional resume is ready.",
+    "downloadPDF": "Download PDF",
+    "emailTitle": "Or Send to Email",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "your@email.com",
+    "sendEmail": "Send to My Email",
+    "emailSuccess": "Check your inbox!",
+    "emailError": "Something went wrong. Please try again.",
+    "startOver": "Start Over"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "generateFailed": "Failed to generate resume. Please try again.",
+    "saveFailed": "Could not save. Continuing anyway.",
+    "rateLimited": "Too many requests. Please wait a moment."
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "password": "Admin Password",
+    "login": "Login",
+    "wrongPassword": "Incorrect password",
+    "totalResumes": "Total Resumes",
+    "thisMonth": "This Month",
+    "completionRate": "Completion Rate",
+    "avgTime": "Avg. Completion Time",
+    "language": "Language Breakdown",
+    "skills": "Most Common Skills",
+    "recent": "Recent Resumes",
+    "name": "Name",
+    "date": "Date",
+    "lang": "Language",
+    "export": "Export",
+    "exportCSV": "Export CSV",
+    "loading": "Loading..."
+  }
+}
