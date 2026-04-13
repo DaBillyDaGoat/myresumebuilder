@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import type { Language, ContactInfo as ContactInfoType, FormData } from '@/types'
+import { StateSelect } from '@/components/ui/StateSelect'
 import enStrings from '@/lib/i18n/en.json'
 import esStrings from '@/lib/i18n/es.json'
 
@@ -13,12 +15,27 @@ interface ContactInfoProps {
 const inputClass = 'w-full border border-gray-300 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-[#0A66C2] min-h-[44px]'
 const labelClass = 'block text-sm font-semibold text-gray-700 mb-1.5'
 
+function parseCityState(val: string): { city: string; state: string } {
+  const parts = (val || '').split(', ')
+  return { city: parts[0] || '', state: parts[1] || '' }
+}
+
 export function ContactInfo({ formData, onChange, language }: ContactInfoProps) {
   const t = language === 'es' ? esStrings : enStrings
   const c = formData.contact
 
+  // Local city/state split for the city-state address option
+  const [cityState] = useState(() => parseCityState(c.cityState || ''))
+  const [city, setCity] = useState(cityState.city)
+  const [stateCode, setStateCode] = useState(cityState.state)
+
   const update = (field: keyof ContactInfoType, value: string) => {
     onChange({ contact: { ...c, [field]: value } })
+  }
+
+  const updateCityState = (newCity: string, newState: string) => {
+    const combined = newCity + (newState ? ', ' + newState : '')
+    onChange({ contact: { ...c, cityState: combined } })
   }
 
   return (
@@ -113,13 +130,31 @@ export function ContactInfo({ formData, onChange, language }: ContactInfoProps) 
       {c.addressOption === 'city-state' && (
         <div>
           <label className={labelClass}>{t.contact.cityState}</label>
-          <input
-            type="text"
-            className={inputClass}
-            placeholder={t.contact.cityStatePlaceholder}
-            value={c.cityState || ''}
-            onChange={e => update('cityState', e.target.value)}
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder={language === 'es' ? 'Ciudad' : 'City'}
+                value={city}
+                onChange={e => {
+                  setCity(e.target.value)
+                  updateCityState(e.target.value, stateCode)
+                }}
+                autoComplete="address-level2"
+              />
+            </div>
+            <div>
+              <StateSelect
+                value={stateCode}
+                onChange={val => {
+                  setStateCode(val)
+                  updateCityState(city, val)
+                }}
+                placeholder={language === 'es' ? 'Estado' : 'State'}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

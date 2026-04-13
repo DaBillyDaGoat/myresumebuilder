@@ -13,41 +13,41 @@ interface EmailFormProps {
 
 export function EmailForm({ fullName, language }: EmailFormProps) {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'unconfigured'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
   const t = language === 'es' ? esStrings : enStrings
 
   const handleSend = async () => {
     if (!email || !email.includes('@')) return
 
     setStatus('sending')
+    setErrorMsg('')
     try {
       const { firstName, lastName } = getNameParts(fullName)
 
-      // Get PDF as base64 for email attachment
+      // Generate PDF as base64 for attachment
       let pdfBase64: string | undefined
       try {
         const element = document.getElementById('resume-pdf-target')
         if (element) {
           const html2pdf = (await import('html2pdf.js')).default
-          pdfBase64 = await html2pdf()
+          const dataUri: string = await html2pdf()
             .set({
               margin: 0,
               filename: 'resume.pdf',
-              image: { type: 'jpeg', quality: 0.95 },
-              html2canvas: { scale: 2, useCORS: true },
-              jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+              image: { type: 'jpeg' as const, quality: 0.95 },
+              html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+              jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const },
             })
             .from(element)
             .output('datauristring')
 
-          // Strip the data URI prefix
-          if (pdfBase64 && pdfBase64.includes(',')) {
-            pdfBase64 = pdfBase64.split(',')[1]
+          if (dataUri && dataUri.includes(',')) {
+            pdfBase64 = dataUri.split(',')[1]
           }
         }
-      } catch (pdfError) {
-        console.error('PDF generation for email failed:', pdfError)
-        // Continue without attachment
+      } catch (pdfErr) {
+        console.warn('PDF generation for email failed, sending without attachment:', pdfErr)
       }
 
       const res = await fetch('/api/email', {
@@ -56,11 +56,35 @@ export function EmailForm({ fullName, language }: EmailFormProps) {
         body: JSON.stringify({ email, firstName, lastName, pdfBase64 }),
       })
 
-      if (!res.ok) throw new Error('Email send failed')
+      if (!res.ok) {
+        let apiError = ''
+        try {
+          const data = await res.json()
+          apiError = data.error || ''
+        } catch { /* ignore */ }
+
+        if (res.status === 500 && apiError.toLowerCase().includes('not configured')) {
+          setStatus('unconfigured')
+        } else {
+          setErrorMsg(
+            apiError ||
+            (language === 'es'
+              ? 'No se pudo enviar. Por favor intente de nuevo.'
+              : 'Could not send. Please try again.')
+          )
+          setStatus('error')
+        }
+        return
+      }
 
       setStatus('success')
     } catch (err) {
       console.error('Email error:', err)
+      setErrorMsg(
+        language === 'es'
+          ? 'Error de conexión. Por favor intente de nuevo.'
+          : 'Connection error. Please try again.'
+      )
       setStatus('error')
     }
   }
@@ -70,6 +94,21 @@ export function EmailForm({ fullName, language }: EmailFormProps) {
       <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
         <span className="text-green-600 text-2xl">✓</span>
         <p className="text-green-800 font-medium">{t.export.emailSuccess}</p>
+      </div>
+    )
+  }
+
+  if (status === 'unconfigured') {
+    return (
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <p className="text-amber-900 font-semibold text-sm mb-1">
+          {language === 'es' ? 'Servicio de email no configurado' : 'Email service not set up yet'}
+        </p>
+        <p className="text-amber-800 text-sm">
+          {language === 'es'
+            ? 'Por favor descarga el PDF usando el botón de arriba.'
+            : 'Please download your resume using the button above instead.'}
+        </p>
       </div>
     )
   }
@@ -99,7 +138,7 @@ export function EmailForm({ fullName, language }: EmailFormProps) {
         </button>
       </div>
       {status === 'error' && (
-        <p className="text-sm text-red-600">{t.export.emailError}</p>
+        <p className="text-sm text-red-600">{errorMsg || t.export.emailError}</p>
       )}
     </div>
   )

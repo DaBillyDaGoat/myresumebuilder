@@ -2,6 +2,7 @@
 
 import { useId } from 'react'
 import type { Language, EducationEntry, EducationType, FormData } from '@/types'
+import { StateSelect } from '@/components/ui/StateSelect'
 import enStrings from '@/lib/i18n/en.json'
 import esStrings from '@/lib/i18n/es.json'
 
@@ -36,6 +37,11 @@ function createNewEntry(): EducationEntry {
   }
 }
 
+function parseCityState(val: string): { city: string; state: string } {
+  const parts = (val || '').split(', ')
+  return { city: parts[0] || '', state: parts[1] || '' }
+}
+
 export function Education({ formData, onChange, language }: EducationProps) {
   const t = language === 'es' ? esStrings : enStrings
   const uid = useId()
@@ -55,6 +61,12 @@ export function Education({ formData, onChange, language }: EducationProps) {
     onChange({ education: updated })
   }
 
+  const updateCityState = (id: string, city: string, state: string) => {
+    const combined = city + (state ? ', ' + state : '')
+    const updated = entries.map(e => e.id === id ? { ...e, cityState: combined } : e)
+    onChange({ education: updated })
+  }
+
   const addEntry = () => {
     onChange({ education: [...entries, createNewEntry()] })
   }
@@ -66,37 +78,38 @@ export function Education({ formData, onChange, language }: EducationProps) {
 
   return (
     <div className="space-y-8">
-      {entries.map((entry, idx) => (
-        <div key={entry.id} className="border border-gray-200 rounded-xl p-5 space-y-4 bg-gray-50">
-          <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-800">
-              {language === 'es' ? 'Educación' : 'Education'} #{idx + 1}
-            </h3>
-            {entries.length > 1 && (
-              <button
-                onClick={() => removeEntry(entry.id)}
-                className="text-red-500 hover:text-red-700 text-sm min-h-[44px] px-2"
+      {entries.map((entry, idx) => {
+        const { city, state } = parseCityState(entry.cityState)
+        return (
+          <div key={entry.id} className="border border-gray-200 rounded-xl p-5 space-y-4 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-gray-800">
+                {language === 'es' ? 'Educación' : 'Education'} #{idx + 1}
+              </h3>
+              {entries.length > 1 && (
+                <button
+                  onClick={() => removeEntry(entry.id)}
+                  className="text-red-500 hover:text-red-700 text-sm min-h-[44px] px-2"
+                >
+                  {t.education.removeEntry}
+                </button>
+              )}
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor={`${uid}-type-${idx}`}>{t.education.type}</label>
+              <select
+                id={`${uid}-type-${idx}`}
+                className={inputClass}
+                value={entry.type}
+                onChange={e => update(entry.id, 'type', e.target.value as EducationType)}
               >
-                {t.education.removeEntry}
-              </button>
-            )}
-          </div>
+                {EDU_TYPES.map(type => (
+                  <option key={type} value={type}>{eduTypeLabels[type]}</option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className={labelClass} htmlFor={`${uid}-type-${idx}`}>{t.education.type}</label>
-            <select
-              id={`${uid}-type-${idx}`}
-              className={inputClass}
-              value={entry.type}
-              onChange={e => update(entry.id, 'type', e.target.value as EducationType)}
-            >
-              {EDU_TYPES.map(type => (
-                <option key={type} value={type}>{eduTypeLabels[type]}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelClass} htmlFor={`${uid}-school-${idx}`}>{t.education.school}</label>
               <input
@@ -108,70 +121,78 @@ export function Education({ formData, onChange, language }: EducationProps) {
                 onChange={e => update(entry.id, 'school', e.target.value)}
               />
             </div>
-            <div>
-              <label className={labelClass} htmlFor={`${uid}-city-${idx}`}>{t.education.cityState}</label>
-              <input
-                id={`${uid}-city-${idx}`}
-                type="text"
-                className={inputClass}
-                placeholder="e.g. Houston, TX"
-                value={entry.cityState}
-                onChange={e => update(entry.id, 'cityState', e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className={labelClass} htmlFor={`${uid}-date-${idx}`}>{t.education.completionDate}</label>
-              <input
-                id={`${uid}-date-${idx}`}
-                type="text"
-                className={inputClass}
-                placeholder="MM/YYYY"
-                value={entry.completionDate}
-                onChange={e => update(entry.id, 'completionDate', e.target.value)}
-                disabled={entry.inProgress}
-              />
-            </div>
-            <div className="flex items-end pb-1">
-              <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+              <label className={labelClass}>{language === 'es' ? 'Ciudad y Estado' : 'City & State'}</label>
+              <div className="grid grid-cols-2 gap-3">
                 <input
-                  type="checkbox"
-                  checked={entry.inProgress}
-                  onChange={e => update(entry.id, 'inProgress', e.target.checked)}
-                  className="w-5 h-5 text-[#0A66C2] rounded"
+                  type="text"
+                  className={inputClass}
+                  placeholder={language === 'es' ? 'Ciudad' : 'City'}
+                  value={city}
+                  onChange={e => updateCityState(entry.id, e.target.value, state)}
+                  autoComplete="address-level2"
                 />
-                <span className="text-base text-gray-700">{t.education.inProgress}</span>
-              </label>
+                <StateSelect
+                  value={state}
+                  onChange={val => updateCityState(entry.id, city, val)}
+                  placeholder={language === 'es' ? 'Estado' : 'State'}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass} htmlFor={`${uid}-date-${idx}`}>{t.education.completionDate}</label>
+                <input
+                  id={`${uid}-date-${idx}`}
+                  type="text"
+                  className={inputClass}
+                  placeholder="MM/YYYY"
+                  value={entry.completionDate}
+                  onChange={e => update(entry.id, 'completionDate', e.target.value)}
+                  disabled={entry.inProgress}
+                />
+              </div>
+              <div className="flex items-end pb-1">
+                <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                  <input
+                    type="checkbox"
+                    checked={entry.inProgress}
+                    onChange={e => update(entry.id, 'inProgress', e.target.checked)}
+                    className="w-5 h-5 text-[#0A66C2] rounded"
+                  />
+                  <span className="text-base text-gray-700">{t.education.inProgress}</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor={`${uid}-field-${idx}`}>{t.education.field}</label>
+              <input
+                id={`${uid}-field-${idx}`}
+                type="text"
+                className={inputClass}
+                placeholder={t.education.fieldPlaceholder}
+                value={entry.field}
+                onChange={e => update(entry.id, 'field', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor={`${uid}-notes-${idx}`}>{t.education.notes}</label>
+              <input
+                id={`${uid}-notes-${idx}`}
+                type="text"
+                className={inputClass}
+                placeholder={t.education.notesPlaceholder}
+                value={entry.notes}
+                onChange={e => update(entry.id, 'notes', e.target.value)}
+              />
             </div>
           </div>
-
-          <div>
-            <label className={labelClass} htmlFor={`${uid}-field-${idx}`}>{t.education.field}</label>
-            <input
-              id={`${uid}-field-${idx}`}
-              type="text"
-              className={inputClass}
-              placeholder={t.education.fieldPlaceholder}
-              value={entry.field}
-              onChange={e => update(entry.id, 'field', e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className={labelClass} htmlFor={`${uid}-notes-${idx}`}>{t.education.notes}</label>
-            <input
-              id={`${uid}-notes-${idx}`}
-              type="text"
-              className={inputClass}
-              placeholder={t.education.notesPlaceholder}
-              value={entry.notes}
-              onChange={e => update(entry.id, 'notes', e.target.value)}
-            />
-          </div>
-        </div>
-      ))}
+        )
+      })}
 
       <button
         onClick={addEntry}

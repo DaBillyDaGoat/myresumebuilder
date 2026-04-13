@@ -173,37 +173,72 @@ function BuilderContent() {
 
   const renderStep = (step: number) => {
     if (step === 0) {
+      const walkthrough = language === 'es' ? [
+        { icon: '📝', title: 'Cuéntanos sobre ti', body: 'Te haremos preguntas sobre tu trabajo, educación, habilidades y logros. No hay respuestas incorrectas.' },
+        { icon: '⏱️', title: 'Solo 15–20 minutos', body: 'Puedes saltar cualquier sección que no aplique. Guarda tu progreso a tu propio ritmo.' },
+        { icon: '🤖', title: 'La IA crea tu currículum', body: 'Nuestra IA convierte tus respuestas en lenguaje profesional — sin inventar nada, solo puliendo lo que escribiste.' },
+        { icon: '✏️', title: 'Edita todo antes de descargar', body: 'Revisa tu currículum, mueve secciones, edita el texto y descárgalo como PDF cuando estés listo.' },
+      ] : [
+        { icon: '📝', title: 'Tell us about yourself', body: 'We\'ll ask about your work, education, skills, and accomplishments. There are no wrong answers.' },
+        { icon: '⏱️', title: 'About 15–20 minutes', body: 'You can skip any section that doesn\'t apply. Go at your own pace — no rushing.' },
+        { icon: '🤖', title: 'AI builds your resume', body: 'Our AI turns your answers into professional language — it never makes things up, only polishes what you wrote.' },
+        { icon: '✏️', title: 'Edit everything before you download', body: 'Review your resume, rearrange sections, edit any text, then download as a PDF when you\'re ready.' },
+      ]
+
       return (
-        <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-          <div className="mb-8">
-            <div className="w-20 h-20 bg-[#0A66C2] rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="max-w-xl mx-auto px-5 py-10">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-[#0A66C2] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{steps['0'].title}</h1>
-            <p className="text-gray-600 text-lg leading-relaxed max-w-lg mx-auto">{steps['0'].description}</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {language === 'es' ? '¡Vamos a crear tu currículum!' : "Let's build your resume!"}
+            </h1>
+            <p className="text-gray-500 text-base">
+              {language === 'es'
+                ? 'Gratis · Profesional · Sin necesidad de cuenta'
+                : 'Free · Professional · No account needed'}
+            </p>
           </div>
 
-          <div className="bg-blue-50 rounded-xl p-5 mb-8 text-left space-y-3">
-            {[
-              language === 'es' ? '15 pasos rápidos — puedes saltar lo que no aplica' : '15 quick steps — skip anything that doesn\'t apply',
-              language === 'es' ? 'La IA usa SOLO lo que escribes — nada inventado' : 'AI uses ONLY what you write — nothing made up',
-              language === 'es' ? 'Descarga tu currículum como PDF cuando termines' : 'Download your resume as a PDF when done',
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-5 h-5 bg-[#0A66C2] text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
-                <span className="text-sm text-gray-700">{item}</span>
+          {/* Walkthrough steps */}
+          <div className="space-y-3 mb-8">
+            {walkthrough.map((item, idx) => (
+              <div key={idx} className="flex gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl">
+                  {item.icon}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm mb-0.5">{item.title}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                </div>
               </div>
             ))}
           </div>
 
+          {/* Reassurance note */}
+          <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-8 flex gap-3 items-start">
+            <span className="text-green-600 text-lg flex-shrink-0 mt-0.5">✓</span>
+            <p className="text-green-800 text-sm leading-relaxed">
+              {language === 'es'
+                ? 'No te preocupes si tienes poca experiencia — estamos aquí para presentar lo que tienes de la mejor manera posible.'
+                : "Don't worry if you have limited experience — we're here to present what you have in the best possible light."}
+            </p>
+          </div>
+
+          {/* CTA */}
           <button
             onClick={goNext}
-            className="w-full sm:w-auto bg-[#0A66C2] text-white font-bold text-lg py-4 px-10 rounded-xl hover:bg-blue-700 transition-colors min-h-[56px]"
+            className="w-full bg-[#0A66C2] text-white font-bold text-lg py-4 px-10 rounded-xl hover:bg-blue-700 transition-colors min-h-[56px]"
           >
-            {language === 'es' ? 'Empezar →' : 'Get Started →'}
+            {language === 'es' ? '¡Empecemos! →' : "Let's Start →"}
           </button>
+          <p className="text-center text-xs text-gray-400 mt-3">
+            {language === 'es' ? 'Gratis · Sin cuenta · Sin límite de tiempo' : 'Free · No account · No time limit'}
+          </p>
         </div>
       )
     }

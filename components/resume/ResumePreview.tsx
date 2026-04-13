@@ -36,7 +36,18 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
 
   const dismissNote = (id: string) => setDismissedNotes(prev => new Set([...prev, id]))
 
-  const visibleAnnotations = Object.entries(annotations).filter(([id]) => !dismissedNotes.has(id))
+  // Build ordered, visible annotations with badge numbers
+  const orderedAnnotations = sectionOrder
+    .filter(id => annotations[id] && !dismissedNotes.has(id))
+    .map((id, idx) => ({ id, text: annotations[id], badgeNumber: idx + 1 }))
+
+  // badge number map for quick lookup in section rendering
+  const badgeMap: Record<string, number> = {}
+  sectionOrder.forEach((id, idx) => {
+    if (annotations[id] && !dismissedNotes.has(id)) {
+      badgeMap[id] = idx + 1
+    }
+  })
 
   const contact = formData.contact
   const contactLine = [
@@ -48,25 +59,63 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
 
   const { sections } = resume
 
-  const renderSection = (sectionId: string) => {
-    const headerStyle: React.CSSProperties = {
-      fontSize: '12px',
-      fontWeight: 700,
-      textTransform: 'uppercase',
-      letterSpacing: '1.2px',
-      color: '#1A1A1A',
-      borderBottom: '1px solid #D0D0D0',
-      paddingBottom: '3px',
-      marginBottom: '6px',
-      marginTop: '12px',
-    }
+  const headerStyle: React.CSSProperties = {
+    fontSize: '12px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '1.2px',
+    color: '#1A1A1A',
+    borderBottom: '1px solid #D0D0D0',
+    paddingBottom: '3px',
+    marginBottom: '6px',
+    marginTop: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  }
 
+  // Badge rendered next to section header (preview only, not in PDF)
+  const SectionBadge = ({ sectionId }: { sectionId: string }) => {
+    const num = badgeMap[sectionId]
+    if (!num) return null
+    return (
+      <span
+        className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[9px] font-bold flex-shrink-0"
+        style={{ backgroundColor: '#0A66C2', fontSize: '9px' }}
+        aria-label={`Tip ${num}`}
+      >
+        {num}
+      </span>
+    )
+  }
+
+  // Mobile inline sticky note (rendered above each section in resume, hidden on desktop)
+  const InlineStickyNote = ({ sectionId }: { sectionId: string }) => {
+    const annotation = orderedAnnotations.find(a => a.id === sectionId)
+    if (!annotation) return null
+    return (
+      <div className="block lg:hidden mb-2">
+        <StickyNote
+          text={annotation.text}
+          sectionTitle={language === 'es' ? SECTION_LABELS[sectionId]?.es || sectionId : SECTION_LABELS[sectionId]?.en || sectionId}
+          badgeNumber={annotation.badgeNumber}
+          onDismiss={() => dismissNote(sectionId)}
+        />
+      </div>
+    )
+  }
+
+  const renderSection = (sectionId: string) => {
     switch (sectionId) {
       case 'summary':
         if (!resume.summary) return null
         return (
           <div key="summary" className="mb-4">
-            <h2 style={headerStyle}>{language === 'es' ? 'Resumen Profesional' : 'Professional Summary'}</h2>
+            <InlineStickyNote sectionId="summary" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Resumen Profesional' : 'Professional Summary'}
+              <SectionBadge sectionId="summary" />
+            </h2>
             <p style={{ fontSize: '12.5px', color: '#333', lineHeight: '1.6' }}>{resume.summary}</p>
           </div>
         )
@@ -75,7 +124,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.work || sections.work.length === 0) return null
         return (
           <div key="work">
-            <h2 style={headerStyle}>{language === 'es' ? 'Experiencia Laboral' : 'Work Experience'}</h2>
+            <InlineStickyNote sectionId="work" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Experiencia Laboral' : 'Work Experience'}
+              <SectionBadge sectionId="work" />
+            </h2>
             {sections.work.map((job, idx) => (
               <div key={idx} className="mb-4">
                 <div className="flex justify-between items-baseline">
@@ -99,7 +152,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.education || sections.education.length === 0) return null
         return (
           <div key="education">
-            <h2 style={headerStyle}>{language === 'es' ? 'Educación' : 'Education'}</h2>
+            <InlineStickyNote sectionId="education" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Educación' : 'Education'}
+              <SectionBadge sectionId="education" />
+            </h2>
             {sections.education.map((edu, idx) => (
               <div key={idx} className="mb-3">
                 <div className="flex justify-between items-baseline">
@@ -119,7 +176,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.certifications || sections.certifications.length === 0) return null
         return (
           <div key="certifications">
-            <h2 style={headerStyle}>{language === 'es' ? 'Certificaciones' : 'Certifications'}</h2>
+            <InlineStickyNote sectionId="certifications" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Certificaciones' : 'Certifications'}
+              <SectionBadge sectionId="certifications" />
+            </h2>
             {sections.certifications.map((cert, idx) => (
               <div key={idx} className="flex justify-between items-start mb-1">
                 <span style={{ fontSize: '12.5px', color: '#333' }}>{cert.name}{cert.issuer ? ` — ${cert.issuer}` : ''}</span>
@@ -133,7 +194,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.skills?.text) return null
         return (
           <div key="skills">
-            <h2 style={headerStyle}>{language === 'es' ? 'Habilidades' : 'Skills'}</h2>
+            <InlineStickyNote sectionId="skills" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Habilidades' : 'Skills'}
+              <SectionBadge sectionId="skills" />
+            </h2>
             <p style={{ fontSize: '12.5px', color: '#333', lineHeight: '1.6' }}>{sections.skills.text}</p>
           </div>
         )
@@ -142,7 +207,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.volunteer || sections.volunteer.length === 0) return null
         return (
           <div key="volunteer">
-            <h2 style={headerStyle}>{language === 'es' ? 'Trabajo Voluntario' : 'Volunteer Work'}</h2>
+            <InlineStickyNote sectionId="volunteer" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Trabajo Voluntario' : 'Volunteer Work'}
+              <SectionBadge sectionId="volunteer" />
+            </h2>
             {sections.volunteer.map((v, idx) => (
               <div key={idx} className="mb-3">
                 <div className="flex justify-between items-baseline">
@@ -166,7 +235,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.training || sections.training.length === 0) return null
         return (
           <div key="training">
-            <h2 style={headerStyle}>{language === 'es' ? 'Capacitación' : 'Training & Courses'}</h2>
+            <InlineStickyNote sectionId="training" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Capacitación' : 'Training & Courses'}
+              <SectionBadge sectionId="training" />
+            </h2>
             {sections.training.map((tr, idx) => (
               <div key={idx} className="flex justify-between items-start mb-1">
                 <span style={{ fontSize: '12.5px', color: '#333' }}>{tr.program}{tr.provider ? ` — ${tr.provider}` : ''}</span>
@@ -180,7 +253,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.awards || sections.awards.length === 0) return null
         return (
           <div key="awards">
-            <h2 style={headerStyle}>{language === 'es' ? 'Premios y Reconocimientos' : 'Awards & Recognition'}</h2>
+            <InlineStickyNote sectionId="awards" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Premios y Reconocimientos' : 'Awards & Recognition'}
+              <SectionBadge sectionId="awards" />
+            </h2>
             {sections.awards.map((aw, idx) => (
               <div key={idx} className="flex justify-between items-start mb-1">
                 <span style={{ fontSize: '12.5px', color: '#333' }}>{aw.name}{aw.giver ? ` — ${aw.giver}` : ''}</span>
@@ -194,7 +271,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
         if (!sections.interests) return null
         return (
           <div key="interests">
-            <h2 style={headerStyle}>{language === 'es' ? 'Intereses' : 'Interests'}</h2>
+            <InlineStickyNote sectionId="interests" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Intereses' : 'Interests'}
+              <SectionBadge sectionId="interests" />
+            </h2>
             <p style={{ fontSize: '12.5px', color: '#333', lineHeight: '1.6' }}>{sections.interests}</p>
           </div>
         )
@@ -202,7 +283,11 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
       case 'references':
         return (
           <div key="references">
-            <h2 style={headerStyle}>{language === 'es' ? 'Referencias' : 'References'}</h2>
+            <InlineStickyNote sectionId="references" />
+            <h2 style={headerStyle}>
+              {language === 'es' ? 'Referencias' : 'References'}
+              <SectionBadge sectionId="references" />
+            </h2>
             <p style={{ fontSize: '12.5px', color: '#333' }}>{sections.references || 'Available upon request'}</p>
           </div>
         )
@@ -220,20 +305,26 @@ export function ResumePreview({ resume, formData, sectionOrder, annotations, lan
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left sidebar: tips and section reorder */}
+        {/* Left sidebar: tips and section reorder (desktop) */}
         <div className="lg:w-72 flex-shrink-0 space-y-4">
           {/* Section reorder */}
           <SectionReorder sectionOrder={sectionOrder} onReorder={onReorder} language={language} />
 
-          {/* Sticky notes */}
-          {visibleAnnotations.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t.preview.annotations}</h3>
-              {visibleAnnotations.map(([id, text]) => (
+          {/* Desktop sticky notes in sidebar */}
+          {orderedAnnotations.length > 0 && (
+            <div className="hidden lg:block space-y-3">
+              <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                {t.preview.annotations}
+                <span className="text-xs font-normal text-gray-500 normal-case tracking-normal">
+                  {language === 'es' ? '(números vinculan a secciones)' : '(numbers link to sections)'}
+                </span>
+              </h3>
+              {orderedAnnotations.map(({ id, text, badgeNumber }) => (
                 <StickyNote
                   key={id}
                   text={text}
                   sectionTitle={language === 'es' ? SECTION_LABELS[id]?.es || id : SECTION_LABELS[id]?.en || id}
+                  badgeNumber={badgeNumber}
                   onDismiss={() => dismissNote(id)}
                 />
               ))}
