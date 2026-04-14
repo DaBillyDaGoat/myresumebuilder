@@ -79,9 +79,9 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('Resend error:', error)
       const msg = (error as { message?: string }).message || 'Email send failed'
-      // Resend free tier only allows sending to the verified account owner
-      if (msg.toLowerCase().includes('verified') || msg.toLowerCase().includes('domain')) {
-        return NextResponse.json({ error: 'Email restricted: Resend free tier only sends to the verified owner email until a domain is connected.' }, { status: 422 })
+      // Resend free tier only allows sending to the verified account owner until a domain is connected
+      if (msg.toLowerCase().includes('verified') || msg.toLowerCase().includes('domain') || msg.toLowerCase().includes('testing')) {
+        return NextResponse.json({ error: 'email_restricted' }, { status: 422 })
       }
       return NextResponse.json({ error: 'Email send failed', details: msg }, { status: 500 })
     }

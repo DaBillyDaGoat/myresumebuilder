@@ -66,6 +66,8 @@ export function EmailForm({ fullName, language, onExport }: EmailFormProps) {
 
         if (res.status === 500 && apiError.toLowerCase().includes('not configured')) {
           setStatus('unconfigured')
+        } else if (res.status === 422 && apiError === 'email_restricted') {
+          setStatus('unconfigured')
         } else {
           setErrorMsg(
             apiError ||
