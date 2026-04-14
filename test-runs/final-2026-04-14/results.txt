@@ -1,0 +1,23 @@
+desktop_chrome: PASS
+{
+  "label": "desktop_chrome",
+  "passed": true,
+  "hasPdfTarget": true,
+  "hasDownloadBtn": true,
+  "hasEmailFallback": true,
+  "hasErrorText": false,
+  "downloadOk": true,
+  "jsErrors": []
+}
+
+mobile_safari: PASS
+{
+  "label": "mobile_safari",
+  "passed": true,
+  "hasPdfTarget": true,
+  "hasDownloadBtn": true,
+  "hasEmailFallback": true,
+  "hasErrorText": false,
+  "downloadOk": true,
+  "jsErrors": []
+}
