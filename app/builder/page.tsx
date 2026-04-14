@@ -183,7 +183,11 @@ function BuilderContent() {
 
       if (!resumeRes.ok) {
         const err = await resumeRes.json()
-        throw new Error(err.error || 'Generation failed')
+        if (err.error === 'rate_limited') {
+          const wait = err.retryAfter ? ` Please wait ${Math.ceil(err.retryAfter / 60)} minute(s).` : ''
+          throw new Error(t.errors.rateLimited + wait)
+        }
+        throw new Error(err.error || t.errors.generateFailed)
       }
 
       const resumeData = await resumeRes.json()
