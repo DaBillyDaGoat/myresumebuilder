@@ -21,6 +21,7 @@ import { References } from '@/components/questionnaire/References'
 import { SummaryBuilder } from '@/components/questionnaire/SummaryBuilder'
 import { Availability } from '@/components/questionnaire/Availability'
 import { ResumePreview } from '@/components/resume/ResumePreview'
+import { ResumeTemplate } from '@/components/resume/ResumeTemplate'
 import { PDFGenerator } from '@/components/export/PDFGenerator'
 import { EmailForm } from '@/components/export/EmailForm'
 import { getDefaultSectionOrder } from '@/lib/resume-logic'
@@ -61,6 +62,7 @@ function BuilderContent() {
   const [startTime] = useState(Date.now())
   const [showContactErrors, setShowContactErrors] = useState(false)
   const [showWorkErrors, setShowWorkErrors] = useState(false)
+  const [sessionRestored, setSessionRestored] = useState(false)
   const [sessionId] = useState(() =>
     typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2)
   )
@@ -81,6 +83,51 @@ function BuilderContent() {
   useEffect(() => {
     logEvent('session_start')
   }, [logEvent])
+
+  // Restore state from sessionStorage on mount (handles iOS bfcache full unmount)
+  useEffect(() => {
+    if (generatedResume) { setSessionRestored(true); return }
+    try {
+      const saved = sessionStorage.getItem('mrb_resume')
+      if (!saved) { setSessionRestored(true); return }
+      const parsed = JSON.parse(saved)
+      if (parsed.generatedResume && parsed.sectionOrder) {
+        setGeneratedResume(parsed.generatedResume)
+        setSectionOrder(parsed.sectionOrder)
+        if (parsed.language) setLanguage(parsed.language)
+        if (parsed.contact) {
+          setFormData(prev => ({ ...prev, contact: { ...prev.contact, ...parsed.contact } }))
+        }
+        setCurrentStep(18)
+      }
+    } catch { /* ignore parse errors */ }
+    setSessionRestored(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Re-hydrate from sessionStorage on bfcache restore (iOS Safari)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return
+      if (generatedResume) return
+      try {
+        const saved = sessionStorage.getItem('mrb_resume')
+        if (!saved) return
+        const parsed = JSON.parse(saved)
+        if (parsed.generatedResume && parsed.sectionOrder) {
+          setGeneratedResume(parsed.generatedResume)
+          setSectionOrder(parsed.sectionOrder)
+          if (parsed.language) setLanguage(parsed.language)
+          if (parsed.contact) {
+            setFormData(prev => ({ ...prev, contact: { ...prev.contact, ...parsed.contact } }))
+          }
+          setCurrentStep(18)
+        }
+      } catch { /* ignore */ }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [generatedResume])
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }))
@@ -145,6 +192,16 @@ function BuilderContent() {
 
       const order = resumeData.sectionOrder || getDefaultSectionOrder(formData)
       setSectionOrder(order)
+
+      // Persist to sessionStorage — survives iOS bfcache restores; clears on tab close
+      try {
+        sessionStorage.setItem('mrb_resume', JSON.stringify({
+          generatedResume: generated,
+          sectionOrder: order,
+          contact: formData.contact,
+          language,
+        }))
+      } catch { /* private mode or storage full — non-fatal */ }
 
       logEvent('resume_generated')
 
@@ -303,6 +360,11 @@ function BuilderContent() {
     }
   }
 
+  // Wait for sessionStorage check to complete before rendering step 0
+  if (!sessionRestored) {
+    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#0A66C2] border-t-transparent rounded-full animate-spin" /></div>
+  }
+
   if (currentStep === 16) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
@@ -358,6 +420,11 @@ function BuilderContent() {
   if (currentStep === 18 && generatedResume) {
     return (
       <div className="min-h-screen bg-gray-50">
+        {/* Hidden resume DOM node — keeps #resume-pdf-target in DOM for html2pdf on iOS */}
+        <div style={{ position: 'absolute', left: '-9999px', top: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true">
+          <ResumeTemplate resume={generatedResume} sectionOrder={sectionOrder} contact={formData.contact} />
+        </div>
+
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="text-lg font-bold text-[#0A66C2]">MyResumeBuilder</div>
           <LanguageToggle language={language} onChange={setLanguage} />
@@ -398,7 +465,7 @@ function BuilderContent() {
               {language === 'es' ? '← Volver a Vista Previa' : '← Back to Preview'}
             </button>
             <button
-              onClick={() => { setCurrentStep(0); setFormData(initialFormData); setGeneratedResume(null); setAnnotations({}); setSectionOrder([]) }}
+              onClick={() => { try { sessionStorage.removeItem('mrb_resume') } catch { /* ignore */ } setCurrentStep(0); setFormData(initialFormData); setGeneratedResume(null); setAnnotations({}); setSectionOrder([]) }}
               className="flex-1 py-3 border border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 min-h-[44px]"
             >
               {t.export.startOver}

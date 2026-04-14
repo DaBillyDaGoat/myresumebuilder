@@ -2,17 +2,32 @@
 
 import type { GeneratedResume } from '@/types'
 
+interface ContactInfo {
+  fullName?: string
+  phone?: string
+  email?: string
+  addressOption?: string
+  addressFull?: string
+  cityState?: string
+}
+
 interface ResumeTemplateProps {
   resume: GeneratedResume
   sectionOrder: string[]
+  contact?: ContactInfo
   isEditing?: boolean
   onEdit?: (sectionId: string, field: string, value: string) => void
 }
 
-// ResumeTemplate is a thin wrapper around the actual PDF-targetable div.
-// The full rendering logic lives in ResumePreview to avoid duplication.
-// This component exists for the pdf-target id and can be used standalone.
-export function ResumeTemplate({ resume, sectionOrder }: ResumeTemplateProps) {
+// ResumeTemplate renders the full PDF-targetable resume div.
+// Pass `contact` to include the name/contact header (required for PDF export from step 18).
+export function ResumeTemplate({ resume, sectionOrder, contact }: ResumeTemplateProps) {
+  const contactLine = contact ? [
+    contact.phone,
+    contact.email,
+    contact.addressOption === 'full' ? contact.addressFull :
+    contact.addressOption === 'city-state' ? contact.cityState : null,
+  ].filter(Boolean).join(' | ') : ''
   const { sections } = resume
 
   const headerStyle: React.CSSProperties = {
@@ -192,6 +207,14 @@ export function ResumeTemplate({ resume, sectionOrder }: ResumeTemplateProps) {
         boxSizing: 'border-box',
       }}
     >
+      {contact?.fullName && (
+        <div style={{ marginBottom: '12px' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, textTransform: 'uppercase', color: '#1A1A1A', textDecoration: 'underline', textDecorationColor: 'black', textDecorationThickness: '2.5px', letterSpacing: '0.5px', marginBottom: '4px' }}>
+            {contact.fullName}
+          </h1>
+          {contactLine && <p style={{ fontSize: '13px', color: '#555', margin: 0 }}>{contactLine}</p>}
+        </div>
+      )}
       {sectionOrder.map(id => renderSection(id))}
     </div>
   )
