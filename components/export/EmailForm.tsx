@@ -9,9 +9,10 @@ import esStrings from '@/lib/i18n/es.json'
 interface EmailFormProps {
   fullName: string
   language: Language
+  onExport?: () => void
 }
 
-export function EmailForm({ fullName, language }: EmailFormProps) {
+export function EmailForm({ fullName, language, onExport }: EmailFormProps) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'unconfigured'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -77,6 +78,7 @@ export function EmailForm({ fullName, language }: EmailFormProps) {
         return
       }
 
+      onExport?.()
       setStatus('success')
     } catch (err) {
       console.error('Email error:', err)

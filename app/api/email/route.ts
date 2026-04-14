@@ -28,22 +28,28 @@ export async function POST(req: NextRequest) {
 
   const resend = new Resend(resendApiKey)
 
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  const from = `MyResumeBuilder <${fromEmail}>`
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Your Resume'
-  const filename = `MyResumeBuilder_${lastName || 'Resume'}_${firstName || ''}_${new Date().toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' }).replace('/', '')}.pdf`
+
+  // Format: MyResumeBuilder_LastName_FirstName_MMYYYY.pdf
+  const now = new Date()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const yyyy = now.getFullYear()
+  const safeLast = (lastName || 'Resume').replace(/[^a-zA-Z0-9]/g, '')
+  const safeFirst = (firstName || '').replace(/[^a-zA-Z0-9]/g, '')
+  const filename = `MyResumeBuilder_${safeLast}_${safeFirst}_${mm}${yyyy}.pdf`
 
   type Attachment = { filename: string; content: string }
   const attachments: Attachment[] = []
 
   if (pdfBase64) {
-    attachments.push({
-      filename,
-      content: pdfBase64,
-    })
+    attachments.push({ filename, content: pdfBase64 })
   }
 
   try {
     const { error } = await resend.emails.send({
-      from: 'MyResumeBuilder <noreply@myresumebuilder.org>',
+      from,
       to: email,
       subject: `Your Professional Resume — ${fullName}`,
       html: `
@@ -72,7 +78,12 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Resend error:', error)
-      return NextResponse.json({ error: 'Email send failed', details: error.message }, { status: 500 })
+      const msg = (error as { message?: string }).message || 'Email send failed'
+      // Resend free tier only allows sending to the verified account owner
+      if (msg.toLowerCase().includes('verified') || msg.toLowerCase().includes('domain')) {
+        return NextResponse.json({ error: 'Email restricted: Resend free tier only sends to the verified owner email until a domain is connected.' }, { status: 422 })
+      }
+      return NextResponse.json({ error: 'Email send failed', details: msg }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

@@ -10,10 +10,32 @@ interface WorkExperienceProps {
   formData: FormData
   onChange: (updates: Partial<FormData>) => void
   language: Language
+  showErrors?: boolean
 }
 
 const inputClass = 'w-full border border-gray-300 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-[#0A66C2] min-h-[44px]'
 const labelClass = 'block text-sm font-semibold text-gray-700 mb-1.5'
+
+const DESCRIPTION_PROMPTS = {
+  en: [
+    'How many hours per week did you work?',
+    'Did you handle cash, a register, or payments?',
+    'How big was your team? Did you supervise anyone?',
+    'Did you train or help new employees?',
+    'What equipment, tools, or software did you use?',
+    'How many customers/clients did you serve daily?',
+    'What are you most proud of from this job?',
+  ],
+  es: [
+    '¿Cuántas horas por semana trabajabas?',
+    '¿Manejabas efectivo, caja registradora o pagos?',
+    '¿Qué tan grande era tu equipo? ¿Supervisabas a alguien?',
+    '¿Entrenaste o ayudaste a empleados nuevos?',
+    '¿Qué equipos, herramientas o software usabas?',
+    '¿A cuántos clientes atendías diariamente?',
+    '¿De qué estás más orgulloso de este trabajo?',
+  ],
+}
 
 function createNewEntry(): WorkEntry {
   return {
@@ -33,10 +55,14 @@ function parseCityState(val: string): { city: string; state: string } {
   return { city: parts[0] || '', state: parts[1] || '' }
 }
 
-export function WorkExperience({ formData, onChange, language }: WorkExperienceProps) {
+export function WorkExperience({ formData, onChange, language, showErrors = false }: WorkExperienceProps) {
   const t = language === 'es' ? esStrings : enStrings
   const uid = useId()
   const entries = formData.work.length > 0 ? formData.work : [createNewEntry()]
+  const prompts = DESCRIPTION_PROMPTS[language]
+
+  const hasValidEntry = entries.some(e => e.title.trim() && e.employer.trim())
+  const showValidationBanner = showErrors && entries.length > 0 && !hasValidEntry
 
   const update = (id: string, field: keyof WorkEntry, value: string | boolean) => {
     const updated = entries.map(e => e.id === id ? { ...e, [field]: value } : e)
@@ -49,10 +75,7 @@ export function WorkExperience({ formData, onChange, language }: WorkExperienceP
     onChange({ work: updated })
   }
 
-  const addEntry = () => {
-    onChange({ work: [...entries, createNewEntry()] })
-  }
-
+  const addEntry = () => onChange({ work: [...entries, createNewEntry()] })
   const removeEntry = (id: string) => {
     if (entries.length <= 1) return
     onChange({ work: entries.filter(e => e.id !== id) })
@@ -60,6 +83,16 @@ export function WorkExperience({ formData, onChange, language }: WorkExperienceP
 
   return (
     <div className="space-y-8">
+      {showValidationBanner && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-red-700 text-sm font-medium">
+            {language === 'es'
+              ? 'Ingresa al menos un trabajo con título y empleador.'
+              : 'Please enter at least one job with a title and employer.'}
+          </p>
+        </div>
+      )}
+
       {entries.map((entry, idx) => {
         const { city, state } = parseCityState(entry.cityState)
         return (
@@ -69,10 +102,7 @@ export function WorkExperience({ formData, onChange, language }: WorkExperienceP
                 {language === 'es' ? 'Trabajo' : 'Job'} #{idx + 1}
               </h3>
               {entries.length > 1 && (
-                <button
-                  onClick={() => removeEntry(entry.id)}
-                  className="text-red-500 hover:text-red-700 text-sm min-h-[44px] px-2"
-                >
+                <button onClick={() => removeEntry(entry.id)} className="text-red-500 hover:text-red-700 text-sm min-h-[44px] px-2">
                   {t.work.removeJob}
                 </button>
               )}
@@ -81,80 +111,35 @@ export function WorkExperience({ formData, onChange, language }: WorkExperienceP
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass} htmlFor={`${uid}-title-${idx}`}>{t.work.jobTitle}</label>
-                <input
-                  id={`${uid}-title-${idx}`}
-                  type="text"
-                  className={inputClass}
-                  placeholder={t.work.jobTitlePlaceholder}
-                  value={entry.title}
-                  onChange={e => update(entry.id, 'title', e.target.value)}
-                />
+                <input id={`${uid}-title-${idx}`} type="text" className={inputClass} placeholder={t.work.jobTitlePlaceholder} value={entry.title} onChange={e => update(entry.id, 'title', e.target.value)} />
               </div>
               <div>
                 <label className={labelClass} htmlFor={`${uid}-employer-${idx}`}>{t.work.employer}</label>
-                <input
-                  id={`${uid}-employer-${idx}`}
-                  type="text"
-                  className={inputClass}
-                  placeholder={t.work.employerPlaceholder}
-                  value={entry.employer}
-                  onChange={e => update(entry.id, 'employer', e.target.value)}
-                />
+                <input id={`${uid}-employer-${idx}`} type="text" className={inputClass} placeholder={t.work.employerPlaceholder} value={entry.employer} onChange={e => update(entry.id, 'employer', e.target.value)} />
               </div>
             </div>
 
             <div>
               <label className={labelClass}>{language === 'es' ? 'Ciudad y Estado' : 'City & State'}</label>
               <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  className={inputClass}
-                  placeholder={language === 'es' ? 'Ciudad' : 'City'}
-                  value={city}
-                  onChange={e => updateCityState(entry.id, e.target.value, state)}
-                  autoComplete="address-level2"
-                />
-                <StateSelect
-                  value={state}
-                  onChange={val => updateCityState(entry.id, city, val)}
-                  placeholder={language === 'es' ? 'Estado' : 'State'}
-                />
+                <input type="text" className={inputClass} placeholder={language === 'es' ? 'Ciudad' : 'City'} value={city} onChange={e => updateCityState(entry.id, e.target.value, state)} autoComplete="address-level2" />
+                <StateSelect value={state} onChange={val => updateCityState(entry.id, city, val)} placeholder={language === 'es' ? 'Estado' : 'State'} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass} htmlFor={`${uid}-start-${idx}`}>{t.work.startDate}</label>
-                <input
-                  id={`${uid}-start-${idx}`}
-                  type="text"
-                  className={inputClass}
-                  placeholder="MM/YYYY"
-                  value={entry.startDate}
-                  onChange={e => update(entry.id, 'startDate', e.target.value)}
-                />
+                <input id={`${uid}-start-${idx}`} type="text" className={inputClass} placeholder="MM/YYYY" value={entry.startDate} onChange={e => update(entry.id, 'startDate', e.target.value)} />
               </div>
               <div>
                 <label className={labelClass} htmlFor={`${uid}-end-${idx}`}>{t.work.endDate}</label>
-                <input
-                  id={`${uid}-end-${idx}`}
-                  type="text"
-                  className={inputClass}
-                  placeholder="MM/YYYY"
-                  value={entry.endDate}
-                  onChange={e => update(entry.id, 'endDate', e.target.value)}
-                  disabled={entry.current}
-                />
+                <input id={`${uid}-end-${idx}`} type="text" className={inputClass} placeholder="MM/YYYY" value={entry.endDate} onChange={e => update(entry.id, 'endDate', e.target.value)} disabled={entry.current} />
               </div>
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
-              <input
-                type="checkbox"
-                checked={entry.current}
-                onChange={e => update(entry.id, 'current', e.target.checked)}
-                className="w-5 h-5 text-[#0A66C2] rounded"
-              />
+              <input type="checkbox" checked={entry.current} onChange={e => update(entry.id, 'current', e.target.checked)} className="w-5 h-5 text-[#0A66C2] rounded" />
               <span className="text-base text-gray-700">{t.work.current}</span>
             </label>
 
@@ -162,20 +147,31 @@ export function WorkExperience({ formData, onChange, language }: WorkExperienceP
               <label className={labelClass} htmlFor={`${uid}-desc-${idx}`}>{t.work.description}</label>
               <textarea
                 id={`${uid}-desc-${idx}`}
-                className={`${inputClass} min-h-[160px] resize-y`}
-                placeholder={t.work.descriptionPlaceholder}
+                className={`${inputClass} min-h-[140px] resize-y`}
+                placeholder={language === 'es' ? 'Escribe sobre este trabajo en tus propias palabras...' : 'Describe this job in your own words...'}
                 value={entry.description}
                 onChange={e => update(entry.id, 'description', e.target.value)}
               />
+              {/* Always-visible coaching prompts */}
+              <div className="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3">
+                <p className="text-xs font-semibold text-blue-800 mb-1.5">
+                  {language === 'es' ? '💡 Preguntas para ayudarte:' : '💡 Prompts to help you:'}
+                </p>
+                <ul className="space-y-1">
+                  {prompts.map((prompt, pi) => (
+                    <li key={pi} className="text-xs text-blue-700 flex items-start gap-1.5">
+                      <span className="text-blue-400 flex-shrink-0">•</span>
+                      {prompt}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         )
       })}
 
-      <button
-        onClick={addEntry}
-        className="w-full py-3 border-2 border-dashed border-[#0A66C2] text-[#0A66C2] font-semibold rounded-xl hover:bg-blue-50 transition-colors min-h-[52px]"
-      >
+      <button onClick={addEntry} className="w-full py-3 border-2 border-dashed border-[#0A66C2] text-[#0A66C2] font-semibold rounded-xl hover:bg-blue-50 transition-colors min-h-[52px]">
         {t.work.addJob}
       </button>
     </div>

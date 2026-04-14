@@ -9,6 +9,7 @@ import esStrings from '@/lib/i18n/es.json'
 interface PDFGeneratorProps {
   fullName: string
   language: Language
+  onExport?: () => void
 }
 
 function isIOS(): boolean {
@@ -17,7 +18,7 @@ function isIOS(): boolean {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 }
 
-export function PDFGenerator({ fullName, language }: PDFGeneratorProps) {
+export function PDFGenerator({ fullName, language, onExport }: PDFGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
   const t = language === 'es' ? esStrings : enStrings
@@ -44,6 +45,7 @@ export function PDFGenerator({ fullName, language }: PDFGeneratorProps) {
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const },
       }
 
+      onExport?.()
       if (isIOS()) {
         // iOS Safari blocks programmatic blob downloads — open as data URI in new tab
         // so the user can tap Share > Save to Files

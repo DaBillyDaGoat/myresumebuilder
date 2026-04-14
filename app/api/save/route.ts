@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     sectionOrder?: string[]
     rawData?: unknown
     generatedResume?: unknown
+    sessionId?: string
   }
 
   try {
@@ -20,7 +21,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (!supabase) {
-    // Supabase not configured — skip save gracefully
     return NextResponse.json({ id: null, skipped: true })
   }
 
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     sectionOrder,
     rawData,
     generatedResume,
+    sessionId,
   } = body
 
   try {
@@ -54,6 +55,15 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('Supabase save error:', error)
       return NextResponse.json({ error: 'Database save failed', details: error.message }, { status: 500 })
+    }
+
+    // Log resume_generated event to usage_metrics (non-critical)
+    if (sessionId) {
+      void Promise.resolve(supabase.from('usage_metrics').insert({
+        event_type: 'resume_generated',
+        session_id: sessionId,
+        language: language || 'en',
+      })).catch(() => {})
     }
 
     return NextResponse.json({ id: data?.id })

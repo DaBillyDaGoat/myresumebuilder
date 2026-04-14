@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { Language, FormData, GeneratedResume } from '@/types'
 import { LanguageToggle } from '@/components/ui/LanguageToggle'
@@ -28,45 +28,21 @@ import enStrings from '@/lib/i18n/en.json'
 import esStrings from '@/lib/i18n/es.json'
 
 const initialFormData: FormData = {
-  contact: {
-    fullName: '',
-    legalName: '',
-    phone: '',
-    email: '',
-    addressOption: 'city-state',
-    addressFull: '',
-    cityState: '',
-  },
+  contact: { fullName: '', legalName: '', phone: '', email: '', addressOption: 'city-state', addressFull: '', cityState: '' },
   work: [],
   education: [],
   volunteer: [],
   certifications: [],
-  skills: {
-    computer: [],
-    communication: [],
-    physical: [],
-    interpersonal: [],
-    other: '',
-  },
+  skills: { computer: [], communication: [], physical: [], interpersonal: [], other: '' },
   military: null,
   training: [],
   awards: [],
   employmentGaps: [],
   accomplishments: [],
   interests: '',
-  references: {
-    type: 'request',
-    list: [],
-  },
-  summary: {
-    targetRole: '',
-    strengths: '',
-  },
-  availability: {
-    schedule: 'open',
-    transportation: [],
-    willingToRelocate: 'yes',
-  },
+  references: { type: 'request', list: [] },
+  summary: { targetRole: '', strengths: '' },
+  availability: { schedule: 'open', transportation: [], willingToRelocate: 'yes' },
 }
 
 const TOTAL_STEPS = 15
@@ -78,35 +54,80 @@ function BuilderContent() {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [generatedResume, setGeneratedResume] = useState<GeneratedResume | null>(null)
   const [annotations, setAnnotations] = useState<Record<string, string>>({})
+  const [annotationsLoading, setAnnotationsLoading] = useState(false)
   const [sectionOrder, setSectionOrder] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [generateError, setGenerateError] = useState('')
   const [startTime] = useState(Date.now())
+  const [showContactErrors, setShowContactErrors] = useState(false)
+  const [showWorkErrors, setShowWorkErrors] = useState(false)
+  const [sessionId] = useState(() =>
+    typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2)
+  )
 
   const t = language === 'es' ? esStrings : enStrings
   const steps = t.steps as Record<string, { title: string; description: string }>
+
+  // Fire-and-forget event logging
+  const logEvent = useCallback((eventType: string, stepNumber?: number, sectionId?: string) => {
+    fetch('/api/metrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: eventType, session_id: sessionId, step_number: stepNumber, language, section_id: sectionId }),
+    }).catch(() => {})
+  }, [sessionId, language])
+
+  // Log session start once on mount
+  useEffect(() => {
+    logEvent('session_start')
+  }, [logEvent])
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }))
   }
 
-  const goNext = () => setCurrentStep(prev => prev + 1)
-  const goBack = () => setCurrentStep(prev => Math.max(0, prev - 1))
-  const goSkip = () => setCurrentStep(prev => prev + 1)
+  const validateContact = (): boolean => {
+    const { fullName, phone, email } = formData.contact
+    return !!(fullName.trim() && phone.trim() && email.includes('@'))
+  }
 
-  // Step 0: Intro screen
-  // Steps 1-15: questionnaire
-  // Step 16: generating
-  // Step 17: preview
-  // Step 18: export
+  const validateWork = (): boolean => {
+    if (formData.work.length === 0) return true // skip-able, no entries = valid
+    return formData.work.some(w => w.title.trim() && w.employer.trim())
+  }
+
+  const goNext = () => {
+    if (currentStep === 1) {
+      if (!validateContact()) {
+        setShowContactErrors(true)
+        return
+      }
+      setShowContactErrors(false)
+    }
+    if (currentStep === 2) {
+      if (!validateWork()) {
+        setShowWorkErrors(true)
+        return
+      }
+      setShowWorkErrors(false)
+    }
+    logEvent('step_complete', currentStep)
+    setCurrentStep(prev => prev + 1)
+  }
+
+  const goBack = () => setCurrentStep(prev => Math.max(0, prev - 1))
+  const goSkip = () => {
+    logEvent('step_complete', currentStep)
+    setCurrentStep(prev => prev + 1)
+  }
 
   const handleFinishQuestionnaire = async () => {
+    logEvent('step_complete', 15)
     setCurrentStep(16)
     setIsGenerating(true)
     setGenerateError('')
 
     try {
-      // Call 1: Generate resume
       const resumeRes = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,24 +143,10 @@ function BuilderContent() {
       const generated: GeneratedResume = { ...resumeData, language }
       setGeneratedResume(generated)
 
-      // Set section order from AI or default
       const order = resumeData.sectionOrder || getDefaultSectionOrder(formData)
       setSectionOrder(order)
 
-      // Call 2: Generate annotations
-      try {
-        const annotRes = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ formData: resumeData, language, callType: 'annotations' }),
-        })
-        if (annotRes.ok) {
-          const annotData = await annotRes.json()
-          setAnnotations(annotData)
-        }
-      } catch {
-        // Annotations are optional — continue without them
-      }
+      logEvent('resume_generated')
 
       // Save to Supabase (non-blocking)
       const completionTime = Math.round((Date.now() - startTime) / 1000)
@@ -154,20 +161,46 @@ function BuilderContent() {
           sectionOrder: order,
           rawData: formData,
           generatedResume: generated,
+          sessionId,
         }),
-      }).catch(() => {/* non-critical */})
+      }).catch(() => {})
 
+      // Move to preview first, then fire Call 2 (annotations) in the background
       setCurrentStep(17)
+      setAnnotationsLoading(true)
+
+      fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formData: resumeData, language, callType: 'annotations' }),
+      })
+        .then(async res => {
+          if (res.ok) {
+            const data = await res.json()
+            setAnnotations(data)
+          }
+        })
+        .catch(() => {})
+        .finally(() => setAnnotationsLoading(false))
+
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t.errors.generateFailed
       setGenerateError(message)
       setIsGenerating(false)
-      // Go back to last step on error
       setCurrentStep(15)
     } finally {
       setIsGenerating(false)
     }
   }
+
+  const handleResumeChange = useCallback((updater: (prev: GeneratedResume) => GeneratedResume) => {
+    setGeneratedResume(prev => prev ? updater(prev) : prev)
+  }, [])
+
+  const handleReorder = useCallback((newOrder: string[]) => {
+    setSectionOrder(newOrder)
+    logEvent('section_reordered')
+  }, [logEvent])
 
   const commonProps = { formData, onChange: updateFormData, language }
 
@@ -175,19 +208,18 @@ function BuilderContent() {
     if (step === 0) {
       const walkthrough = language === 'es' ? [
         { icon: '📝', title: 'Cuéntanos sobre ti', body: 'Te haremos preguntas sobre tu trabajo, educación, habilidades y logros. No hay respuestas incorrectas.' },
-        { icon: '⏱️', title: 'Solo 15–20 minutos', body: 'Puedes saltar cualquier sección que no aplique. Guarda tu progreso a tu propio ritmo.' },
+        { icon: '⏱️', title: 'Solo 15–20 minutos', body: 'Puedes saltar cualquier sección que no aplique. Ve a tu propio ritmo.' },
         { icon: '🤖', title: 'La IA crea tu currículum', body: 'Nuestra IA convierte tus respuestas en lenguaje profesional — sin inventar nada, solo puliendo lo que escribiste.' },
-        { icon: '✏️', title: 'Edita todo antes de descargar', body: 'Revisa tu currículum, mueve secciones, edita el texto y descárgalo como PDF cuando estés listo.' },
+        { icon: '✏️', title: 'Edita todo antes de descargar', body: 'Revisa tu currículum, mueve secciones, edita el texto y descárgalo como PDF.' },
       ] : [
-        { icon: '📝', title: 'Tell us about yourself', body: 'We\'ll ask about your work, education, skills, and accomplishments. There are no wrong answers.' },
-        { icon: '⏱️', title: 'About 15–20 minutes', body: 'You can skip any section that doesn\'t apply. Go at your own pace — no rushing.' },
-        { icon: '🤖', title: 'AI builds your resume', body: 'Our AI turns your answers into professional language — it never makes things up, only polishes what you wrote.' },
-        { icon: '✏️', title: 'Edit everything before you download', body: 'Review your resume, rearrange sections, edit any text, then download as a PDF when you\'re ready.' },
+        { icon: '📝', title: 'Tell us about yourself', body: "We'll ask about your work, education, skills, and accomplishments. There are no wrong answers." },
+        { icon: '⏱️', title: 'About 15–20 minutes', body: "You can skip any section that doesn't apply. Go at your own pace." },
+        { icon: '🤖', title: 'AI builds your resume', body: "Our AI turns your answers into professional language — it never makes things up, only polishes what you wrote." },
+        { icon: '✏️', title: 'Edit everything before you download', body: 'Review your resume, rearrange sections, edit any text, then download as a PDF.' },
       ]
 
       return (
         <div className="max-w-xl mx-auto px-5 py-10">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-[#0A66C2] rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,19 +230,14 @@ function BuilderContent() {
               {language === 'es' ? '¡Vamos a crear tu currículum!' : "Let's build your resume!"}
             </h1>
             <p className="text-gray-500 text-base">
-              {language === 'es'
-                ? 'Gratis · Profesional · Sin necesidad de cuenta'
-                : 'Free · Professional · No account needed'}
+              {language === 'es' ? 'Gratis · Profesional · Sin necesidad de cuenta' : 'Free · Professional · No account needed'}
             </p>
           </div>
 
-          {/* Walkthrough steps */}
           <div className="space-y-3 mb-8">
             {walkthrough.map((item, idx) => (
               <div key={idx} className="flex gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-                <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl">
-                  {item.icon}
-                </div>
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl">{item.icon}</div>
                 <div>
                   <p className="font-semibold text-gray-900 text-sm mb-0.5">{item.title}</p>
                   <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
@@ -219,7 +246,6 @@ function BuilderContent() {
             ))}
           </div>
 
-          {/* Reassurance note */}
           <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-8 flex gap-3 items-start">
             <span className="text-green-600 text-lg flex-shrink-0 mt-0.5">✓</span>
             <p className="text-green-800 text-sm leading-relaxed">
@@ -229,11 +255,7 @@ function BuilderContent() {
             </p>
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={goNext}
-            className="w-full bg-[#0A66C2] text-white font-bold text-lg py-4 px-10 rounded-xl hover:bg-blue-700 transition-colors min-h-[56px]"
-          >
+          <button onClick={goNext} className="w-full bg-[#0A66C2] text-white font-bold text-lg py-4 px-10 rounded-xl hover:bg-blue-700 transition-colors min-h-[56px]">
             {language === 'es' ? '¡Empecemos! →' : "Let's Start →"}
           </button>
           <p className="text-center text-xs text-gray-400 mt-3">
@@ -246,7 +268,10 @@ function BuilderContent() {
     const stepInfo = steps[String(step)]
     if (!stepInfo) return null
 
-    const stepProps = {
+    const skippableSteps = [4, 7, 8, 9, 10, 12]
+    const isSkippable = skippableSteps.includes(step)
+
+    const wrapperProps = {
       title: stepInfo.title,
       description: stepInfo.description,
       onBack: goBack,
@@ -255,49 +280,26 @@ function BuilderContent() {
       currentStep: step,
       totalSteps: TOTAL_STEPS,
       isLastStep: step === TOTAL_STEPS,
-    }
-
-    const skippableSteps = [4, 7, 8, 9, 10, 12]
-    const isSkippable = skippableSteps.includes(step)
-
-    const wrapperProps = {
-      ...stepProps,
       ...(isSkippable ? { onSkip: goSkip, skippable: true } : {}),
     }
 
     switch (step) {
-      case 1:
-        return <StepWrapper {...wrapperProps}><ContactInfo {...commonProps} /></StepWrapper>
-      case 2:
-        return <StepWrapper {...wrapperProps}><WorkExperience {...commonProps} /></StepWrapper>
-      case 3:
-        return <StepWrapper {...wrapperProps}><Education {...commonProps} /></StepWrapper>
-      case 4:
-        return <StepWrapper {...wrapperProps}><VolunteerWork {...commonProps} /></StepWrapper>
-      case 5:
-        return <StepWrapper {...wrapperProps}><Certifications {...commonProps} /></StepWrapper>
-      case 6:
-        return <StepWrapper {...wrapperProps}><Skills {...commonProps} /></StepWrapper>
-      case 7:
-        return <StepWrapper {...wrapperProps}><Military {...commonProps} /></StepWrapper>
-      case 8:
-        return <StepWrapper {...wrapperProps}><Training {...commonProps} /></StepWrapper>
-      case 9:
-        return <StepWrapper {...wrapperProps}><Awards {...commonProps} /></StepWrapper>
-      case 10:
-        return <StepWrapper {...wrapperProps}><EmploymentGaps {...commonProps} /></StepWrapper>
-      case 11:
-        return <StepWrapper {...wrapperProps}><Accomplishments {...commonProps} /></StepWrapper>
-      case 12:
-        return <StepWrapper {...wrapperProps}><Interests {...commonProps} /></StepWrapper>
-      case 13:
-        return <StepWrapper {...wrapperProps}><References {...commonProps} /></StepWrapper>
-      case 14:
-        return <StepWrapper {...wrapperProps}><SummaryBuilder {...commonProps} /></StepWrapper>
-      case 15:
-        return <StepWrapper {...wrapperProps}><Availability {...commonProps} /></StepWrapper>
-      default:
-        return null
+      case 1: return <StepWrapper {...wrapperProps}><ContactInfo {...commonProps} showErrors={showContactErrors} /></StepWrapper>
+      case 2: return <StepWrapper {...wrapperProps}><WorkExperience {...commonProps} showErrors={showWorkErrors} /></StepWrapper>
+      case 3: return <StepWrapper {...wrapperProps}><Education {...commonProps} /></StepWrapper>
+      case 4: return <StepWrapper {...wrapperProps}><VolunteerWork {...commonProps} /></StepWrapper>
+      case 5: return <StepWrapper {...wrapperProps}><Certifications {...commonProps} /></StepWrapper>
+      case 6: return <StepWrapper {...wrapperProps}><Skills {...commonProps} /></StepWrapper>
+      case 7: return <StepWrapper {...wrapperProps}><Military {...commonProps} /></StepWrapper>
+      case 8: return <StepWrapper {...wrapperProps}><Training {...commonProps} /></StepWrapper>
+      case 9: return <StepWrapper {...wrapperProps}><Awards {...commonProps} /></StepWrapper>
+      case 10: return <StepWrapper {...wrapperProps}><EmploymentGaps {...commonProps} /></StepWrapper>
+      case 11: return <StepWrapper {...wrapperProps}><Accomplishments {...commonProps} /></StepWrapper>
+      case 12: return <StepWrapper {...wrapperProps}><Interests {...commonProps} /></StepWrapper>
+      case 13: return <StepWrapper {...wrapperProps}><References {...commonProps} /></StepWrapper>
+      case 14: return <StepWrapper {...wrapperProps}><SummaryBuilder {...commonProps} /></StepWrapper>
+      case 15: return <StepWrapper {...wrapperProps}><Availability {...commonProps} /></StepWrapper>
+      default: return null
     }
   }
 
@@ -310,24 +312,19 @@ function BuilderContent() {
             <h2 className="text-2xl font-bold text-gray-900 mb-3">{t.processing.title}</h2>
             <p className="text-gray-600 leading-relaxed">{t.processing.subtitle}</p>
           </div>
-
           {generateError && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
               <p className="text-red-700 text-sm">{generateError}</p>
-              <button
-                onClick={() => setCurrentStep(15)}
-                className="mt-3 text-[#0A66C2] font-semibold text-sm underline"
-              >
+              <button onClick={() => setCurrentStep(15)} className="mt-3 text-[#0A66C2] font-semibold text-sm underline">
                 {language === 'es' ? 'Volver e intentar de nuevo' : 'Go back and try again'}
               </button>
             </div>
           )}
-
           <div className="mt-8 space-y-3 text-sm text-gray-500">
-            {[t.processing.step1, t.processing.step2, t.processing.step3, t.processing.step4].map((step, idx) => (
+            {[t.processing.step1, t.processing.step2, t.processing.step3, t.processing.step4].map((s, idx) => (
               <div key={idx} className="flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full ${isGenerating ? 'bg-[#0A66C2] animate-pulse' : 'bg-gray-300'}`} />
-                <span>{step}</span>
+                <span>{s}</span>
               </div>
             ))}
           </div>
@@ -348,9 +345,11 @@ function BuilderContent() {
           formData={formData}
           sectionOrder={sectionOrder}
           annotations={annotations}
+          annotationsLoading={annotationsLoading}
           language={language}
-          onReorder={setSectionOrder}
+          onReorder={handleReorder}
           onFinalize={() => setCurrentStep(18)}
+          onResumeChange={handleResumeChange}
         />
       </div>
     )
@@ -374,35 +373,32 @@ function BuilderContent() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
-            <PDFGenerator fullName={formData.contact.fullName} language={language} />
+            <PDFGenerator
+              fullName={formData.contact.fullName}
+              language={language}
+              onExport={() => logEvent('export_pdf')}
+            />
 
             <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-white text-gray-500">{t.export.emailTitle}</span>
               </div>
             </div>
 
-            <EmailForm fullName={formData.contact.fullName} language={language} />
+            <EmailForm
+              fullName={formData.contact.fullName}
+              language={language}
+              onExport={() => logEvent('export_email')}
+            />
           </div>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setCurrentStep(17)}
-              className="flex-1 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 min-h-[44px]"
-            >
+            <button onClick={() => setCurrentStep(17)} className="flex-1 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 min-h-[44px]">
               {language === 'es' ? '← Volver a Vista Previa' : '← Back to Preview'}
             </button>
             <button
-              onClick={() => {
-                setCurrentStep(0)
-                setFormData(initialFormData)
-                setGeneratedResume(null)
-                setAnnotations({})
-                setSectionOrder([])
-              }}
+              onClick={() => { setCurrentStep(0); setFormData(initialFormData); setGeneratedResume(null); setAnnotations({}); setSectionOrder([]) }}
               className="flex-1 py-3 border border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 min-h-[44px]"
             >
               {t.export.startOver}
@@ -419,21 +415,14 @@ function BuilderContent() {
         <div className="text-base font-bold text-[#0A66C2]">MyResumeBuilder</div>
         <LanguageToggle language={language} onChange={setLanguage} />
       </header>
-
-      <main>
-        {renderStep(currentStep)}
-      </main>
+      <main>{renderStep(currentStep)}</main>
     </div>
   )
 }
 
 export default function BuilderPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#0A66C2] border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#0A66C2] border-t-transparent rounded-full animate-spin" /></div>}>
       <BuilderContent />
     </Suspense>
   )

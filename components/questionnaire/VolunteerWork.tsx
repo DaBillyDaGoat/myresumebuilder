@@ -14,6 +14,21 @@ interface VolunteerWorkProps {
 const inputClass = 'w-full border border-gray-300 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-[#0A66C2] min-h-[44px]'
 const labelClass = 'block text-sm font-semibold text-gray-700 mb-1.5'
 
+const DESCRIPTION_PROMPTS = {
+  en: [
+    'What did you actually do? (sorting, serving, teaching, building...)',
+    'How many people did you help or work with?',
+    'How often did you volunteer? (weekly, monthly, for an event)',
+    'Did you take on any responsibilities or lead anything?',
+  ],
+  es: [
+    '¿Qué hacías exactamente? (clasificar, servir, enseñar, construir...)',
+    '¿A cuántas personas ayudaste o con quién trabajabas?',
+    '¿Con qué frecuencia voluntariabas? (semanal, mensual, para un evento)',
+    '¿Tuviste alguna responsabilidad o liderazgo?',
+  ],
+}
+
 function createNew(): VolunteerEntry {
   return { id: crypto.randomUUID(), role: '', org: '', dates: '', description: '' }
 }
@@ -22,15 +37,30 @@ export function VolunteerWork({ formData, onChange, language }: VolunteerWorkPro
   const t = language === 'es' ? esStrings : enStrings
   const uid = useId()
   const entries = formData.volunteer
+  const prompts = DESCRIPTION_PROMPTS[language]
 
   const update = (id: string, field: keyof VolunteerEntry, value: string) => {
     onChange({ volunteer: entries.map(e => e.id === id ? { ...e, [field]: value } : e) })
   }
 
   const addEntry = () => onChange({ volunteer: [...entries, createNew()] })
+  const removeEntry = (id: string) => onChange({ volunteer: entries.filter(e => e.id !== id) })
 
-  const removeEntry = (id: string) => {
-    onChange({ volunteer: entries.filter(e => e.id !== id) })
+  if (entries.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-6 text-gray-500">
+          <p className="text-sm mb-4">
+            {language === 'es'
+              ? 'Agrega trabajo voluntario que hayas realizado — servicio comunitario, iglesia, eventos, ayudar a vecinos.'
+              : 'Add any unpaid work you\'ve done — community service, church, events, helping neighbors.'}
+          </p>
+        </div>
+        <button onClick={addEntry} className="w-full py-3 border-2 border-dashed border-[#0A66C2] text-[#0A66C2] font-semibold rounded-xl hover:bg-blue-50 transition-colors min-h-[52px]">
+          {t.volunteer.addEntry}
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -62,7 +92,26 @@ export function VolunteerWork({ formData, onChange, language }: VolunteerWorkPro
 
           <div>
             <label className={labelClass} htmlFor={`${uid}-desc-${idx}`}>{t.volunteer.description}</label>
-            <textarea id={`${uid}-desc-${idx}`} className={`${inputClass} min-h-[100px] resize-y`} placeholder={t.volunteer.descriptionPlaceholder} value={entry.description} onChange={e => update(entry.id, 'description', e.target.value)} />
+            <textarea
+              id={`${uid}-desc-${idx}`}
+              className={`${inputClass} min-h-[100px] resize-y`}
+              placeholder={language === 'es' ? 'Describe tu trabajo voluntario...' : 'Describe your volunteer work...'}
+              value={entry.description}
+              onChange={e => update(entry.id, 'description', e.target.value)}
+            />
+            <div className="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3">
+              <p className="text-xs font-semibold text-blue-800 mb-1.5">
+                {language === 'es' ? '💡 Ideas para ayudarte:' : '💡 Details to include:'}
+              </p>
+              <ul className="space-y-1">
+                {prompts.map((prompt, pi) => (
+                  <li key={pi} className="text-xs text-blue-700 flex items-start gap-1.5">
+                    <span className="text-blue-400 flex-shrink-0">•</span>
+                    {prompt}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       ))}

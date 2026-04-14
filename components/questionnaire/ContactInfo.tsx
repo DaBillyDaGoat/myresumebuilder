@@ -10,9 +10,11 @@ interface ContactInfoProps {
   formData: FormData
   onChange: (updates: Partial<FormData>) => void
   language: Language
+  showErrors?: boolean
 }
 
 const inputClass = 'w-full border border-gray-300 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-[#0A66C2] min-h-[44px]'
+const inputErrorClass = 'w-full border border-red-400 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-red-400 min-h-[44px]'
 const labelClass = 'block text-sm font-semibold text-gray-700 mb-1.5'
 
 function parseCityState(val: string): { city: string; state: string } {
@@ -20,12 +22,16 @@ function parseCityState(val: string): { city: string; state: string } {
   return { city: parts[0] || '', state: parts[1] || '' }
 }
 
-export function ContactInfo({ formData, onChange, language }: ContactInfoProps) {
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+export function ContactInfo({ formData, onChange, language, showErrors = false }: ContactInfoProps) {
   const t = language === 'es' ? esStrings : enStrings
   const c = formData.contact
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
-  // Local city/state split for the city-state address option
-  const [cityState] = useState(() => parseCityState(c.cityState || ''))
+  const cityState = parseCityState(c.cityState || '')
   const [city, setCity] = useState(cityState.city)
   const [stateCode, setStateCode] = useState(cityState.state)
 
@@ -38,18 +44,35 @@ export function ContactInfo({ formData, onChange, language }: ContactInfoProps) 
     onChange({ contact: { ...c, cityState: combined } })
   }
 
+  const touch = (field: string) => setTouched(prev => ({ ...prev, [field]: true }))
+
+  const errors = {
+    fullName: (!c.fullName.trim()) ? (language === 'es' ? 'El nombre es requerido' : 'Name is required') : '',
+    phone: (!c.phone.trim()) ? (language === 'es' ? 'El teléfono es requerido' : 'Phone number is required') : '',
+    email: (!c.email.trim())
+      ? (language === 'es' ? 'El correo es requerido' : 'Email is required')
+      : !validateEmail(c.email)
+        ? (language === 'es' ? 'Correo electrónico inválido' : 'Enter a valid email address')
+        : '',
+  }
+
+  const showErr = (field: keyof typeof errors) =>
+    errors[field] && (showErrors || touched[field])
+
   return (
     <div className="space-y-5">
       <div>
         <label className={labelClass}>{t.contact.fullName} *</label>
         <input
           type="text"
-          className={inputClass}
+          className={showErr('fullName') ? inputErrorClass : inputClass}
           placeholder={t.contact.fullNamePlaceholder}
           value={c.fullName}
           onChange={e => update('fullName', e.target.value)}
+          onBlur={() => touch('fullName')}
           autoComplete="name"
         />
+        {showErr('fullName') && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
       </div>
 
       <div>
@@ -68,26 +91,30 @@ export function ContactInfo({ formData, onChange, language }: ContactInfoProps) 
         <label className={labelClass}>{t.contact.phone} *</label>
         <input
           type="tel"
-          className={inputClass}
+          className={showErr('phone') ? inputErrorClass : inputClass}
           placeholder={t.contact.phonePlaceholder}
           value={c.phone}
           onChange={e => update('phone', e.target.value)}
+          onBlur={() => touch('phone')}
           autoComplete="tel"
           inputMode="tel"
         />
+        {showErr('phone') && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
       </div>
 
       <div>
         <label className={labelClass}>{t.contact.email} *</label>
         <input
           type="email"
-          className={inputClass}
+          className={showErr('email') ? inputErrorClass : inputClass}
           placeholder={t.contact.emailPlaceholder}
           value={c.email}
           onChange={e => update('email', e.target.value)}
+          onBlur={() => touch('email')}
           autoComplete="email"
           inputMode="email"
         />
+        {showErr('email') && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
       </div>
 
       <div>
