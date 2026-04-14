@@ -12,11 +12,33 @@ interface EmailFormProps {
   onExport?: () => void
 }
 
+// Email delivery requires a connected sending domain. Until Billy connects
+// myresumebuilder.org (or another domain) to Resend, all sends fail for
+// non-owner addresses. Set NEXT_PUBLIC_EMAIL_ENABLED=true in Vercel env
+// once the domain is verified to re-enable the form.
+const EMAIL_ENABLED = process.env.NEXT_PUBLIC_EMAIL_ENABLED === 'true'
+
 export function EmailForm({ fullName, language, onExport }: EmailFormProps) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'unconfigured'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const t = language === 'es' ? esStrings : enStrings
+
+  // Show "coming soon" immediately if email is not yet enabled
+  if (!EMAIL_ENABLED) {
+    return (
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <p className="text-amber-900 font-semibold text-sm mb-1">
+          {language === 'es' ? 'Envío por email — próximamente' : 'Email delivery — coming soon'}
+        </p>
+        <p className="text-amber-800 text-sm">
+          {language === 'es'
+            ? 'Por ahora, usa el botón de arriba para descargar tu currículum en PDF.'
+            : 'For now, use the Download PDF button above to save your resume.'}
+        </p>
+      </div>
+    )
+  }
 
   const handleSend = async () => {
     if (!email || !email.includes('@')) return
