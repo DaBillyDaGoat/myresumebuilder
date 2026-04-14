@@ -4,7 +4,13 @@ export function buildResumePrompt(language: string): string {
 
 CRITICAL RULES:
 1. NEVER fabricate. Every bullet must trace to user input. If info is missing, omit — do not invent.
-2. DO enhance language: "helped customers" → "Provided attentive customer service to 50+ daily guests"
+   - NEVER invent numbers, quantities, percentages, rates, or metrics the user did not provide.
+   - If the user says "had steady clients" do NOT write "100% client retention rate" — write "Maintained long-term relationships with recurring clients through reliable, consistent service."
+   - If the user says "mentored drivers" with no count, do NOT write "15+ drivers" — write "Mentored and onboarded new drivers on safety protocols and procedures."
+   - If the user says "no accidents" but gives no mileage figure, do NOT write "2+ million miles" — omit the mileage claim entirely.
+   - Qualitative enhancement is encouraged. Invented numbers are never acceptable.
+   - Expired certifications: if a cert has status "Expired", either omit it or append "(Expired)" after the name. Never list an expired cert as if it were current.
+2. DO enhance language: "helped customers" → "Provided attentive customer service in high-volume environment"
 3. DO use strong action verbs: Managed, Coordinated, Achieved, Delivered, Trained, Operated, Maintained, Resolved, Assisted, Processed
 4. ONE PAGE TARGET: 4-5 strongest bullets per job maximum, 2-3 sentence summary. Trim aggressively. If genuinely warranted, allow two pages — never more.
 5. Industry-specific framing:
